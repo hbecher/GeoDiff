@@ -18,6 +18,9 @@
        
 
 <script>
+    var id_table= new Array();//verif unicite des id 
+    id_table[0] = new Array();
+    id_table[1] = new Array(); 
     var myObject = new Array();
     myObject[3]=new Array();
     //contiendra les modifications
@@ -51,7 +54,16 @@
         myObject[i] = (JSON.parse(reader.result));
         //console.log("debut",myObject);
         //console.log(" loadendd i =",i);
+        for (var k = 0 ; k < myObject[i].features.length ; k = k + 1 ){//pour chaque element du premier
+                if (id_table[i-1][myObject[1].features[k].properties[id_name]] !== undefined){
+                    console.log("erreur id non unique");
+                }
+                else{
+                    id_table[i-1][myObject[i].features[k].properties[id_name]] = k;//ajout de l'id et de son indice dans la table
+                    console.log("id_table",i,myObject[i].features[k].properties[id_name],id_table[i-1][myObject[i].features[k].properties[id_name]]);
+                }                    
 
+            }
         if (i === 1){//on copie le premier fichier dans myobjet[0] et myobject[1]
             myObject[0] = jQuery.extend(true,{},myObject[1]);//attention
             i = i + 1;
@@ -65,14 +77,15 @@
              */
         }
         else{
-            for (var j = 0 ; j < myObject[i].features.length ; j = j + 1 ){ //parcours du i eme fichier 
+            for (var j = 0 ; j < myObject[i].features.length ; j = j + 1 ){ //parcours du i eme fichier
+                    
                 for (var k = 0 ; k < myObject[1].features.length ; k = k + 1 ){//pour chaque element du premier
-                    console.log("test",id_name,myObject[i].features[j].properties[id_name]);
-                    //to do verif unicite id et existtance en ajout dans une "hashmap " 
-                    //si deux id identique sortir avec erreur 
-                    //assoccier id et numero de feature 
+                    //console.log("test",id_name,myObject[i].features[j].properties[id_name]);
+
                     //regarder id deuxieme fichier trouver la ligne correspondante dans le premier si elle existe (meilleur perf)
-                    if (myObject[i].features[j].properties[id_name] === myObject[1].features[k].properties[id_name]){//id unique 
+                    //to do coordinate dans le cas d'un type autre que point : polygone line ...
+
+                    if (myObject[i].features[j].properties[id_name] === myObject[1].features[k].properties[id_name]){//id unique  avant k  
                         //DEBUG
                         //console.log("tableau avant sup = ",myObject[0].features);
                         //console.log("k-v:",k-v);
