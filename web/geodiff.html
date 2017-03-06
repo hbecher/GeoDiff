@@ -1,3 +1,6 @@
+<?php
+echo '<!-- zobe -->'."\n";
+?>
 <!DOCTYPE html>
 <html>
 	<head>
@@ -6,8 +9,8 @@
 		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" />
 		<script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
 		<script src="jquery-3.1.1.min.js"></script>
-		<link rel="stylesheet" href="test.css" />
-		<script src="test.js"></script>
+		<link rel="stylesheet" href="geodiff.css" />
+		<script src="geodiff.js"></script>
 	</head>
 	<body>
 		<div id="container">
@@ -26,7 +29,7 @@
 			map = L.map('geodiff').setView([47.8112046, 7.3455739], 15);
 
 			L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
-				attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery Â© <a href="http://mapbox.com">Mapbox</a>',
+				attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
 				maxZoom: 18,
 				id: 'mapbox.satellite',
 				accessToken: 'pk.eyJ1IjoiaGJlY2hlciIsImEiOiJjaXl1NndsOHIwMDFuMnBwZGs0cXVnaWhoIn0.eqPdgZUTqVjDzI3fLdMhyA'

@@ -1,0 +1,35 @@
+html, body {
+	margin: 0;
+	padding: 0;
+	height: 100%;
+}
+
+#container {
+	position: absolute;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	right: 264px;
+	float: left;
+	height: 100%;
+	display: block;
+	margin: 0;
+	padding: 0;
+}
+
+#geodiff {
+	height: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+#controls {
+	position: absolute;
+	float: right;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	width: 256px;
+	margin: 0;
+	padding: 0;
+}
