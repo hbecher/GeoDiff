@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+    <!-- http://www.commentcamarche.net/forum/affich-26511139-recuperation-de-valeur-d-un-input-html-en-javascript-->
+    <head>
+        <meta charset = "UTF-8"/>
+        <title>Geodiff</title>
+         <script type="text/javascript" src="jquery-3.1.1.min.js"></script> 
+    </head> 
+
+    <body>
+         <FORM>
+            <p>Indiquer le nom de votre champs id svp<p>
+            <input type="text" name="id_name_field" id="id_name_field" value="" />
+            
+            <input type="button" value="OK" onclick="getID();" />
+        </FORM> 
+        <input id="file" type="file" multiple style="visibility: hidden;" />
+       
+
+<script>
+    var myObject = new Array();
+    myObject[3]=new Array();
+    //contiendra les modifications
+    myObject[4]=new Array();
+    //contiendra les ajouts
+    //myObject[0] contiendra les supressions  
+    //myObject[1] fichier 1
+    //myObject[2] fichier 2
+    var i = 1 ;
+    var fileInput = document.querySelector('#file');
+    //recuperation des fichier d'entree
+    var sup;
+    //debug voir l'element supprime de myobject[1]
+    var v = 0 ;
+    //garde le nb de supression 
+    var reader = new FileReader();
+    function getID()
+    {
+        //12:27:05,131 L’utilisation de « getPreventDefault() » est obsolète. Utiliser « defaultPrevented » à la place. geodiff.html
+        id_name = document.getElementById("id_name_field").value;
+        document.getElementById("file").style.visibility="visible"; //demasquage pour choisir fichier 
+        //verifier si un id a bien ete entre 
+        console.log("id:",id_name);
+        //console.log("id:",id_name);
+        //return id_name;
+    } 
+    
+    //evenement fin du chargement du fichier 
+    reader.addEventListener('loadend', function(){ 
+        //console.log("id:",id_name);
+        myObject[i] = (JSON.parse(reader.result));
+        //console.log("debut",myObject);
+        //console.log(" loadendd i =",i);
+
+        if (i === 1){//on copie le premier fichier dans myobjet[0] et myobject[1]
+            myObject[0] = jQuery.extend(true,{},myObject[1]);//attention
+            i = i + 1;
+            /*
+            //test copie par val et pas par ref 
+            console.log(myObject[0]);
+            console.log(myObject[1]);
+            myObject[0].features.splice(1,1);
+            console.log(myObject[0]);
+            console.log(myObject[1]);
+             */
+        }
+        else{
+            for (var j = 0 ; j < myObject[i].features.length ; j = j + 1 ){ //parcours du i eme fichier 
+                for (var k = 0 ; k < myObject[1].features.length ; k = k + 1 ){//pour chaque element du premier
+                    console.log("test",id_name,myObject[i].features[j].properties[id_name]);
+                    //to do verif unicite id et existtance en ajout dans une "hashmap " 
+                    //si deux id identique sortir avec erreur 
+                    //assoccier id et numero de feature 
+                    //regarder id deuxieme fichier trouver la ligne correspondante dans le premier si elle existe (meilleur perf)
+                    if (myObject[i].features[j].properties[id_name] === myObject[1].features[k].properties[id_name]){//id unique 
+                        //DEBUG
+                        //console.log("tableau avant sup = ",myObject[0].features);
+                        //console.log("k-v:",k-v);
+                        //console.log("v",v);
+                        //FIN DEBUG
+                        sup = myObject[0].features.splice(k-v,1);//ce n'est pas une suppression donc on l'enleve du fichier qui contiendra les suppression
+                        v=v+1;//on update le nombre de supression
+                        //DEBUG
+                        //console.log("sup = ",sup);
+                        //console.log("tableau apres sup = ",myObject[0].features);
+                        //console.log("tableau non modif fin = ",myObject[1].features);
+                        // console.log("taille du fichier des supp",myObject[0].features.length);   
+                        //FIN DEBUG
+                        if (myObject[i].features[j].geometry.coordinates[0] === myObject[1].features[k].geometry.coordinates[0] 
+                            && myObject[i].features[j].geometry.coordinates[1] === myObject[1].features[k].geometry.coordinates[1] ){
+                            //console.log("ligne identique")
+                            //si les id et les coordonne sont les meme on passe a la ligne suivante 
+                            break;
+                        }else{
+                            //console.log("modif : deplacement");
+                            myObject[3].push(myObject[i].features[j]);//si les coordonnees sont differente:
+                            // on ajoute cette ligne dans le tableau des modification
+                            break;
+                        }
+                        
+                    }
+                    else if (k === myObject[1].features.length - 1 ){//si l'id ne correspond a aucun du premier fichier
+                            //console.log("ajout");
+                            myObject[4].push(myObject[i].features[j]);//on la place dand le tableau des ajout 
+                    }
+                }
+                    //console.log(myObject[i].features[j].properties);    
+            }
+            console.log("fichier 1:",myObject[1]);
+            console.log("fichier 2:",myObject[2]);
+            console.log("supression",myObject[0].features);
+            console.log("modif",myObject[3]);
+            console.log("ajout",myObject[4]);
+        }
+    });
+
+    fileInput.addEventListener('change', function(){
+        reader.readAsText(fileInput.files[0]);
+        
+    }); 
+    /*
+    var fich_supp =JSON.stringify(myObject[0].features);
+                //console.log("tst",tst);
+            //console.log("modif",myObject[3]);
+                var fich_modif =JSON.stringify(myObject[3]);
+            //console.log("ajout",myObject[4]);
+                var fich_ajout =JSON.stringify(myObject[4]);
+            i = i + 1 ;
+            console.log("resultat",fich_supp,"\n",fich_modif,"\n",fich_ajout);
+            //envoi requette post au server pour stockage? puis possibilite de telecharger le fichier resultat 
+            //en cours de codage 
+            var xhr_object = null; 
+    
+            if(window.XMLHttpRequest){ // Firefox 
+                xhr_object = new XMLHttpRequest();
+                alert("ok"); 
+                console.log("ici");
+            }else if(window.ActiveXObject){ // Internet Explorer 
+                xhr_object = new ActiveXObject("Microsoft.XMLHTTP"); 
+            }else { // XMLHttpRequest non supporté par le navigateur 
+                alert("Votre navigateur ne supporte pas les objets XMLHTTPRequest..."); 
+            return; 
+            } 
+
+             xhr_object.open("POST","http://localhost",true);
+             xhr_object.setRequestHeader("Content-type","application/json");
+             var data  = "tst";  
+            xhr_object.send(data); 
+
+
+
+    */
+</script>
+	</body>
+
+</html>
+
+
+
