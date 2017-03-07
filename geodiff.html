@@ -52,6 +52,7 @@
     reader.addEventListener('loadend', function(){ 
         //console.log("id:",id_name);
         myObject[i] = (JSON.parse(reader.result));
+        var numero_de_ligne = 0;
         //console.log("debut",myObject);
         //console.log(" loadendd i =",i);
         for (var k = 0 ; k < myObject[i].features.length ; k = k + 1 ){//pour chaque element du premier
@@ -60,10 +61,10 @@
                 }
                 else{
                     id_table[i-1][myObject[i].features[k].properties[id_name]] = k;//ajout de l'id et de son indice dans la table
-                    console.log("id_table",i,myObject[i].features[k].properties[id_name],id_table[i-1][myObject[i].features[k].properties[id_name]]);
+                    //console.log("id_table",i,myObject[i].features[k].properties[id_name],id_table[i-1][myObject[i].features[k].properties[id_name]]);
                 }                    
 
-            }
+        }
         if (i === 1){//on copie le premier fichier dans myobjet[0] et myobject[1]
             myObject[0] = jQuery.extend(true,{},myObject[1]);//attention
             i = i + 1;
@@ -78,46 +79,37 @@
         }
         else{
             for (var j = 0 ; j < myObject[i].features.length ; j = j + 1 ){ //parcours du i eme fichier
-                    
-                for (var k = 0 ; k < myObject[1].features.length ; k = k + 1 ){//pour chaque element du premier
-                    //console.log("test",id_name,myObject[i].features[j].properties[id_name]);
-
-                    //regarder id deuxieme fichier trouver la ligne correspondante dans le premier si elle existe (meilleur perf)
+                if (myObject[i].features[j].properties[id_name] in id_table[0]){
+                    //si l' id du feature j du deuxieme fichier existe dans le premier 
+                    numero_de_ligne = id_table[0][myObject[i].features[j].properties[id_name]];
+                    //console.log(" j ",j,"numero de ligne",numero_de_ligne);
+                    //DEBUG
+                    //console.log("tableau avant sup = ",myObject[0].features);
+                    //console.log("k-v:",k-v);
+                    //console.log("v",v);
+                    //FIN DEBUG
+                    sup = myObject[0].features.splice(numero_de_ligne-v,1);//ce n'est pas une suppression donc on l'enleve du fichier qui contiendra les suppression
+                    v=v+1;//on update le nombre de supression
+                    //DEBUG
+                    //console.log("sup = ",sup);
+                    //console.log("tableau apres sup = ",myObject[0].features);
+                    //console.log("tableau non modif fin = ",myObject[1].features);
+                    // console.log("taille du fichier des supp",myObject[0].features.length);   
+                    //FIN DEBUG
                     //to do coordinate dans le cas d'un type autre que point : polygone line ...
-
-                    if (myObject[i].features[j].properties[id_name] === myObject[1].features[k].properties[id_name]){//id unique  avant k  
-                        //DEBUG
-                        //console.log("tableau avant sup = ",myObject[0].features);
-                        //console.log("k-v:",k-v);
-                        //console.log("v",v);
-                        //FIN DEBUG
-                        sup = myObject[0].features.splice(k-v,1);//ce n'est pas une suppression donc on l'enleve du fichier qui contiendra les suppression
-                        v=v+1;//on update le nombre de supression
-                        //DEBUG
-                        //console.log("sup = ",sup);
-                        //console.log("tableau apres sup = ",myObject[0].features);
-                        //console.log("tableau non modif fin = ",myObject[1].features);
-                        // console.log("taille du fichier des supp",myObject[0].features.length);   
-                        //FIN DEBUG
-                        if (myObject[i].features[j].geometry.coordinates[0] === myObject[1].features[k].geometry.coordinates[0] 
-                            && myObject[i].features[j].geometry.coordinates[1] === myObject[1].features[k].geometry.coordinates[1] ){
-                            //console.log("ligne identique")
-                            //si les id et les coordonne sont les meme on passe a la ligne suivante 
-                            break;
-                        }else{
-                            //console.log("modif : deplacement");
-                            myObject[3].push(myObject[i].features[j]);//si les coordonnees sont differente:
-                            // on ajoute cette ligne dans le tableau des modification
-                            break;
-                        }
-                        
+                    if (myObject[i].features[j].geometry.coordinates[0] === myObject[1].features[numero_de_ligne].geometry.coordinates[0] 
+                        && myObject[i].features[j].geometry.coordinates[1] === myObject[1].features[numero_de_ligne].geometry.coordinates[1] ){
+                        //console.log("ligne identique")
+                        //si les id et les coordonne sont les meme on passe a la ligne suivante 
+                    }else{
+                       // console.log("modif : deplacement");
+                        myObject[3].push(myObject[i].features[j]);//si les coordonnees sont differente:
+                        // on ajoute cette ligne dans le tableau des modification
                     }
-                    else if (k === myObject[1].features.length - 1 ){//si l'id ne correspond a aucun du premier fichier
-                            //console.log("ajout");
-                            myObject[4].push(myObject[i].features[j]);//on la place dand le tableau des ajout 
-                    }
-                }
-                    //console.log(myObject[i].features[j].properties);    
+                }else {//si l'id ne correspond a aucun du premier fichier
+                    //console.log("ajout");
+                    myObject[4].push(myObject[i].features[j]);//on la place dand le tableau des ajout 
+                }  
             }
             console.log("fichier 1:",myObject[1]);
             console.log("fichier 2:",myObject[2]);
@@ -126,12 +118,12 @@
             console.log("ajout",myObject[4]);
         }
     });
-
     fileInput.addEventListener('change', function(){
-        reader.readAsText(fileInput.files[0]);
-        
+        reader.readAsText(fileInput.files[0]);   
     }); 
     /*
+    //envoi au serveur brouillon ci dessous 
+
     var fich_supp =JSON.stringify(myObject[0].features);
                 //console.log("tst",tst);
             //console.log("modif",myObject[3]);
