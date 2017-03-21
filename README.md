@@ -25,4 +25,5 @@ The GeoDiff command-line tool is written in Java, and uses
 * [Gson](https://github.com/google/gson) (from Google) for manipulating JSON objects (under Apache License 2.0)
 * [GeoJSON addon](https://github.com/filosganga/geogson) for Gson by user [filosganga](https://github.com/filosganga) (under Apache License 2.0)
 * [JOpt Simple](https://pholser.github.io/jopt-simple/), a Java library for parsing command line options (under The MIT License)
+
 The web interface used [jQuery](https://jquery.com/). It embeds a delta computing module written entirely in JavaScript that can process GeoJSON files.
