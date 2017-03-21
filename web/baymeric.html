@@ -4,7 +4,8 @@
     <head>
         <meta charset = "UTF-8"/>
         <title>Geodiff</title>
-         <script type="text/javascript" src="jquery-3.1.1.min.js"></script> 
+         <script type="text/javascript" src="jquery-3.1.1.min.js"></script>
+         <script type="text/javascript" src="CompareGeojsonGeometry.js"></script>  
     </head> 
 
     <body>
@@ -97,12 +98,27 @@
                     // console.log("taille du fichier des supp",myObject[0].features.length);   
                     //FIN DEBUG
                     //to do coordinate dans le cas d'un type autre que point : polygone line ...
-                    if (myObject[i].features[j].geometry.coordinates[0] === myObject[1].features[numero_de_ligne].geometry.coordinates[0] 
-                        && myObject[i].features[j].geometry.coordinates[1] === myObject[1].features[numero_de_ligne].geometry.coordinates[1] ){
-                        //console.log("ligne identique")
-                        //si les id et les coordonne sont les meme on passe a la ligne suivante 
-                    }else{
-                       // console.log("modif : deplacement");
+                    //to do verif type
+
+                    //si la longueur et le type sont identique
+                    if (myObject[i].features[j].geometry.coordinates.length === myObject[1].features[numero_de_ligne].geometry.coordinates.length && myObject[i].features[j].geometry.type === myObject[1].features[numero_de_ligne].geometry.type){
+
+                        for (var l = 0 ; l < myObject[i].features[j].geometry.coordinates.length ){
+                            //si au moins une coordonne differente => modif 
+                            if (myObject[i].features[j].geometry.coordinates[l] !== myObject[1].features[numero_de_ligne].geometry.coordinates[l]){
+                                 // console.log("modif : ");
+                                myObject[3].push(myObject[i].features[j]);//si les coordonnees sont differente:
+                                // on ajoute cette ligne dans le tableau des modification
+                                break;
+
+                            }
+
+                        }
+
+                    }
+                    //sinon c'est une modif (type ou longueur differente )
+                    else{
+                        // console.log("modif : ");
                         myObject[3].push(myObject[i].features[j]);//si les coordonnees sont differente:
                         // on ajoute cette ligne dans le tableau des modification
                     }

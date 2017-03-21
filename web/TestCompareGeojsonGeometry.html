@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset = "UTF-8"/>
+        <title>TestCompareGeojsonGeometry</title>
+         <script type="text/javascript" src="CompareGeojsonGeometry.js"></script>  
+    </head> 
+
+    <body>
+       
+<script>
+        //TEST CompareGeojsonGeometry()
+        //consistance des hauteur ?
+        var p1 =[1,1];
+        var p2 =[2,2];
+        var p3 =[3,3];
+        var p3bis =[3,3,3];
+        var p3bisbis =[3,3,4];
+
+         var pol1=[[[1,1],[1,1],[1,1]],[[2,2],[2,2],[2,2]]];
+         var pol2=[[[21,21],[21,21],[21,21]],[[22,22],[22,22],[22,22]]];
+         var pol2bis=[[[21,21],[21,21,21],[21,21]],[[22,22],[22,22],[22,22]]];
+         var pol3=[[[31,31],[31,31],[31,31]],[[32,32],[32,32],[32,32]]];
+         var pol3bis=[[[31,31],[31,399],[31,31]],[[32,32],[32,32],[32,32]]];
+         var pol4=[[[4,1],[4,1],[4,1]],[[4,2],[4,2],[4,2]],[[4,3],[4,3],[4,3]]];
+         var pol4bis=[[[4,1],[4,1],[4,1]],[[4,3],[4,3],[4,3]],[[4,2],[4,2],[4,2]]];
+         //to do declarer variable point ... pour les autre test 
+         //attention polygone non identique a l'interieur d'un multigones 
+
+        console.log("test Point different attendu faux ",CompareGeojsonGeometry(p1,p2,"Point"));
+        console.log("test Point identique attendu vraie ",CompareGeojsonGeometry(p1,p1,"Point"));
+        console.log("test Point different (hauteur differente) attendu faux ",CompareGeojsonGeometry(p3,p3bis,"Point"));
+        console.log("test Point different (hauteur differente) attendu faux  ",CompareGeojsonGeometry(p3bis,p3bisbis,"Point"));
+        console.log("test Point identique (hauteur identique)  attendu vraie  ",CompareGeojsonGeometry(p3bis,p3bis,"Point"));
+
+        console.log("test multi-point identique (ordre) attendu vraie",CompareGeojsonGeometry([p1,p2],[p1,p2],"MultiPoint"));
+        console.log("test multi-point identique (desordre) attendu vraie",CompareGeojsonGeometry([p1,p2],[p2,p1],"MultiPoint"));
+        console.log("test multi-point identique (vide) attendu vraie",CompareGeojsonGeometry([],[],"MultiPoint"));
+        console.log("test multi-point different (hauteur differente) attendu faux",CompareGeojsonGeometry([p2,p3],[p2,p3bis],"MultiPoint"));
+        console.log("test multi-point identique (hauteur identique) (desordre) attendu vraie",CompareGeojsonGeometry([p2,p3bis],[p3bis,p2],"MultiPoint"));
+        console.log("test multi-point different (hauteur differente) (desordre) attendu faux",CompareGeojsonGeometry([p2,p3bis],[p3bisbis,p2],"MultiPoint"));
+
+        console.log("test linestring identique (ordre) attendu vraie",CompareGeojsonGeometry([p1,p2],[p1,p2],"LineString"));
+        console.log("test linestring different (desordre) attendu faux",CompareGeojsonGeometry([p1,p2,p3],[p2,p1,p3],"LineString"));
+        console.log("test linestring different (hauteur differente) attendu faux",CompareGeojsonGeometry([p1,p3bis],[p1,p3],"LineString"));
+        console.log("test linestring identique (hauteur identique) attendu vraie",CompareGeojsonGeometry([p3bis,p1],[p3bis,p1],"LineString"));
+        console.log("test linestring different (desordre) attendu faux",CompareGeojsonGeometry([p1,p2],[p2,p1],"LineString"));
+
+        console.log("test Multilinestring identique  (ordre) attendu vraie",CompareGeojsonGeometry([[p1,p2],[p2,p3]],[[p1,p2],[p2,p3]],"MultiLineString"));
+        console.log("test Multilinestring identique  (desordre) attendu vraie",CompareGeojsonGeometry([[p1,p2],[p2,p3]],[[p2,p3],[p1,p2]],"MultiLineString"));
+        console.log("test Multilinestring differente (hauteur differente) attendu faux",CompareGeojsonGeometry([[p1,p3bis],[p2,p3]],[[p1,p3],[p2,p3]],"MultiLineString"));
+        console.log("test Multilinestring identique  (hauteur identique) attendu vraie",CompareGeojsonGeometry([[p3bis,p1],[p2,p3]],[[p3bis,p1],[p2,p3]],"MultiLineString"));
+
+        console.log("test Polygone identique attendu vraie",CompareGeojsonGeometry(pol1,pol1,"Polygon"));
+        console.log("test Polygone different attendue faux",CompareGeojsonGeometry(pol1,pol2,"Polygon"));
+        console.log("test Polygone identique (ordre) attendu vraie",CompareGeojsonGeometry(pol4,pol4,"Polygon"));
+        console.log("test Polygone identique (desordre) attendu vraie",CompareGeojsonGeometry(pol4,pol4bis,"Polygon"));
+
+        console.log("test MultiPolygone identique (ordre) attendu vraie",CompareGeojsonGeometry([pol1,pol2,pol3],[pol1,pol2,pol3],"MultiPolygon"));
+        console.log("test MultiPolygone identique  (desordre) attendu vraie",CompareGeojsonGeometry([pol1,pol2,pol3],[pol3,pol1,pol3],"MultiPolygon"));
+        console.log("test MultiPolygone different (hauteur differente) attendu faux",CompareGeojsonGeometry([pol1,pol2,pol3],[pol1,pol3bis,pol2],"MultiPolygon"));
+        console.log("test MultiPolygone different (hauteur differente) attendu faux",CompareGeojsonGeometry([pol1,pol2bis,pol3],[pol1,pol3,pol2],"MultiPolygon"));
+
+
+        </script>
+    </body>
+
+</html>
+
+
+
+
+
+
