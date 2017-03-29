@@ -3,8 +3,8 @@ package com.bbfos.hbecher.geodiff.metadata;
 import java.util.Map;
 
 /**
- * An object that holds the parsed metadata arguments passed via the {@code --metadata} option.<br />
- * The metadata should always contain the {@link com.bbfos.hbecher.geodiff.elements.Identifier unique identifier}.
+ * An object that holds the parsed metadata arguments passed via the {@code --metadata} option.<br>
+ * The metadata should always contain the {@link com.bbfos.hbecher.geodiff.element.Identifier unique identifier}.
  */
 public class Metadata
 {
@@ -15,7 +15,7 @@ public class Metadata
 	private final Map<String, String> metadata;
 
 	/**
-	 * Creates a {@code Metadata} by parsing the given {@code String}.<br />
+	 * Creates a {@code Metadata} by parsing the given {@code String}.<br>
 	 * {@code} metadata has to be non-null and non-empty.
 	 *
 	 * @param metadata the metadata string
@@ -48,7 +48,7 @@ public class Metadata
 	}
 
 	/**
-	 * Returns the unique identifier specified by the metadata.<br />
+	 * Returns the unique identifier specified by the metadata.<br>
 	 * May be null. You can use {@link Metadata#hasId()} to check if the uid is present.
 	 *
 	 * @return The unique identifier.

@@ -1,8 +1,8 @@
-package com.bbfos.hbecher.geodiff.parsers;
+package com.bbfos.hbecher.geodiff.parser;
 
 import java.util.List;
 
-import com.bbfos.hbecher.geodiff.elements.Element;
+import com.bbfos.hbecher.geodiff.element.Element;
 import com.bbfos.hbecher.geodiff.metadata.Metadata;
 
 public abstract class Parser

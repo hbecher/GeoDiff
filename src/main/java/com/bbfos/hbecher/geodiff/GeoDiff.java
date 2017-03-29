@@ -3,10 +3,10 @@ package com.bbfos.hbecher.geodiff;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.bbfos.hbecher.geodiff.elements.Element;
-import com.bbfos.hbecher.geodiff.elements.Identifier;
-import com.bbfos.hbecher.geodiff.parsers.ParsedElements;
-import com.bbfos.hbecher.geodiff.states.State;
+import com.bbfos.hbecher.geodiff.element.Element;
+import com.bbfos.hbecher.geodiff.element.Identifier;
+import com.bbfos.hbecher.geodiff.element.Status;
+import com.bbfos.hbecher.geodiff.parser.ParsedElements;
 
 /**
  * This is the module that computes the delta between two given data sets.
@@ -43,14 +43,14 @@ public class GeoDiff
 	}
 
 	/**
-	 * Returns the index of {@code toTest} within {@code elements} if not already visited, {@code -1} otherwise.
+	 * Returns the {@code Element} with the same {@code Identifier} as {@code toTest} within {@code elements} if not already visited, {@code null} otherwise.
 	 *
 	 * @param elements the elements
 	 * @param toTest   the {@code Element} to test
 	 * @param visited  the {@code boolean} array keeping track of already visited elements
-	 * @return The index of {@code toTest} within {@code elements} or {@code -1} if already visited.
+	 * @return The {@code Element} counterpart of {@code toTest} within {@code elements} or {@code null} if already visited.
 	 */
-	private int index(List<Element> elements, Element toTest, boolean[] visited)
+	private Element counterpart(List<Element> elements, Element toTest, boolean[] visited)
 	{
 		Identifier id = toTest.getId();
 
@@ -60,28 +60,29 @@ public class GeoDiff
 			{
 				visited[i] = true;
 
-				return i;
+				return elements.get(i);
 			}
 		}
 
-		return -1;
+		return null;
 	}
 
 	/**
-	 * Computes and returns the delta of the element sets wrapped in a {@link Features} object.
+	 * Computes and returns the delta of the element sets.
 	 *
 	 * @return The delta
+	 * @see Delta
 	 */
-	public Features delta()
+	public Delta delta()
 	{
 		boolean[] visited = new boolean[elementsB.size()];
 		List<Element> result = new ArrayList<>();
 
 		for(Element element : elementsA)
 		{
-			int k = index(elementsB, element, visited);
+			Element e = counterpart(elementsB, element, visited);
 
-			element.setState(k == -1 ? State.DELETION : element.equals(elementsB.get(k)) ? State.INACTION : State.MODIFICATION);
+			element.setStatus(e == null ? Status.DELETION : element.equals(e) ? Status.IDENTICAL : Status.MODIFICATION);
 
 			result.add(element);
 		}
@@ -92,11 +93,11 @@ public class GeoDiff
 			{
 				Element element = elementsB.get(i);
 
-				element.setState(State.ADDITION);
+				element.setStatus(Status.ADDITION);
 				result.add(element);
 			}
 		}
 
-		return new Features(result);
+		return new Delta(result);
 	}
 }

@@ -1,4 +1,4 @@
-package com.bbfos.hbecher.geodiff.elements;
+package com.bbfos.hbecher.geodiff.element;
 
 /**
  * Represents the unique identifier of an {@link Element}.

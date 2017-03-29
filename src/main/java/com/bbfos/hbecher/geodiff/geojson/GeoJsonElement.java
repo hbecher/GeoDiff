@@ -1,26 +1,23 @@
 package com.bbfos.hbecher.geodiff.geojson;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.Map;
 
-import com.bbfos.hbecher.geodiff.elements.Coordinate;
-import com.bbfos.hbecher.geodiff.elements.Element;
-import com.bbfos.hbecher.geodiff.elements.Identifier;
-import com.bbfos.hbecher.geodiff.elements.Type;
-import com.github.filosganga.geogson.model.Coordinates;
+import com.bbfos.hbecher.geodiff.element.Coordinates;
+import com.bbfos.hbecher.geodiff.element.Element;
+import com.bbfos.hbecher.geodiff.element.Identifier;
+import com.bbfos.hbecher.geodiff.element.Type;
 import com.github.filosganga.geogson.model.Feature;
-import com.github.filosganga.geogson.model.positions.Positions;
-import com.github.filosganga.geogson.model.positions.SinglePosition;
 import com.google.common.base.Optional;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 
 public class GeoJsonElement extends Element
 {
 	private final Feature feature;
 	private final Identifier id;
 	private final Type type;
-	private final List<Coordinate> coordinates = new ArrayList<>();
+	private final Coordinates coordinates;
 
 	public GeoJsonElement(Feature feature)
 	{
@@ -31,7 +28,7 @@ public class GeoJsonElement extends Element
 	// otherwise use standard GeoJSON uid feature.id
 	public GeoJsonElement(Feature feature, String propertyId)
 	{
-		String uid;
+		JsonElement uid;
 
 		if(propertyId == null)
 		{
@@ -39,7 +36,7 @@ public class GeoJsonElement extends Element
 
 			if(optId.isPresent())
 			{
-				uid = optId.get();
+				uid = new JsonPrimitive(optId.get());
 			}
 			else
 			{
@@ -48,45 +45,30 @@ public class GeoJsonElement extends Element
 		}
 		else if(propertyId.isEmpty())
 		{
-			throw new IllegalArgumentException("Received empty uid");
+			JsonObject obj = new JsonObject();
+
+			for(Map.Entry<String, JsonElement> entry : feature.properties().entrySet())
+			{
+				obj.add(entry.getKey(), entry.getValue());
+			}
+
+			uid = obj;
 		}
 		else
 		{
-			JsonElement element = feature.properties().get(propertyId);
+			uid = feature.properties().get(propertyId);
 
-			if(element == null)
+			if(uid == null)
 			{
 				throw new IllegalArgumentException("Feature has no valid id");
 			}
-
-			uid = element.getAsString();
 		}
 
 		this.feature = feature;
 		this.id = new GeoJsonIdentifier(uid);
-		this.type = GeoJsonUtils.getType(feature.geometry().type());
+		this.type = Type.from(feature.geometry().type());
 
-		fillCoordinates(coordinates, feature.geometry().positions());
-	}
-
-	private static void fillCoordinates(List<Coordinate> coordinates, Positions positions)
-	{
-		if(positions != null)
-		{
-			if(positions instanceof SinglePosition)
-			{
-				Coordinates c = ((SinglePosition) positions).coordinates();
-
-				coordinates.add(new Coordinate(c.getLon(), c.getLat()));
-			}
-			else
-			{
-				for(Positions child : positions.children())
-				{
-					fillCoordinates(coordinates, child);
-				}
-			}
-		}
+		this.coordinates = new Coordinates(feature.geometry());
 	}
 
 	public Feature getFeature()
@@ -107,9 +89,9 @@ public class GeoJsonElement extends Element
 	}
 
 	@Override
-	public List<Coordinate> getCoordinates()
+	public Coordinates getCoordinates()
 	{
-		return Collections.unmodifiableList(coordinates);
+		return coordinates;
 	}
 
 	@Override

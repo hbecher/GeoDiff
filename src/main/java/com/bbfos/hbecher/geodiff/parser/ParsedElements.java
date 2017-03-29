@@ -1,11 +1,11 @@
-package com.bbfos.hbecher.geodiff.parsers;
+package com.bbfos.hbecher.geodiff.parser;
 
 import java.util.List;
 
-import com.bbfos.hbecher.geodiff.elements.Element;
+import com.bbfos.hbecher.geodiff.element.Element;
 
 /**
- * This is a container holding the {@link Element} lists.<br />
+ * This is a container holding the parsed {@link Element} lists.<br>
  * It is used only to pass the parsed elements from the parser to {@link com.bbfos.hbecher.geodiff.GeoDiff GeoDiff}.
  */
 public class ParsedElements

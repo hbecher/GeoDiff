@@ -7,10 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.bbfos.hbecher.geodiff.elements.Element;
+import com.bbfos.hbecher.geodiff.element.Element;
 import com.bbfos.hbecher.geodiff.metadata.Metadata;
-import com.bbfos.hbecher.geodiff.parsers.ParseException;
-import com.bbfos.hbecher.geodiff.parsers.Parser;
+import com.bbfos.hbecher.geodiff.parser.ParseException;
+import com.bbfos.hbecher.geodiff.parser.Parser;
 
 public class CsvParser extends Parser
 {

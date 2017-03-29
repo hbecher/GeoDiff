@@ -1,16 +1,11 @@
 package com.bbfos.hbecher.geodiff.csv;
 
-import java.util.Collections;
-import java.util.List;
-
-import com.bbfos.hbecher.geodiff.elements.Coordinate;
-import com.bbfos.hbecher.geodiff.elements.Element;
-import com.bbfos.hbecher.geodiff.elements.Type;
+import com.bbfos.hbecher.geodiff.element.Coordinates;
+import com.bbfos.hbecher.geodiff.element.Element;
+import com.bbfos.hbecher.geodiff.element.Type;
 import com.bbfos.hbecher.geodiff.geojson.GeoJsonElement;
-import com.github.filosganga.geogson.model.Coordinates;
 import com.github.filosganga.geogson.model.Feature;
 import com.github.filosganga.geogson.model.Point;
-import com.github.filosganga.geogson.model.positions.SinglePosition;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonElement;
@@ -21,7 +16,7 @@ public class CsvElement extends Element
 	private final String[] properties;
 	private final CsvDescriptor descriptor;
 	private final CsvIdentifier id;
-	private final Coordinate point;
+	private final Coordinates point;
 
 	public CsvElement(String[] properties, CsvDescriptor descriptor)
 	{
@@ -41,7 +36,7 @@ public class CsvElement extends Element
 			throw new IllegalArgumentException("Invalid point coordinates");
 		}
 
-		point = new Coordinate(lon, lat);
+		point = new Coordinates(Point.from(lon, lat));
 	}
 
 	@Override
@@ -57,9 +52,9 @@ public class CsvElement extends Element
 	}
 
 	@Override
-	public List<Coordinate> getCoordinates()
+	public Coordinates getCoordinates()
 	{
-		return Collections.singletonList(point);
+		return point;
 	}
 
 	@Override
@@ -72,6 +67,6 @@ public class CsvElement extends Element
 			builder.put(descriptor.getProperty(i), new JsonPrimitive(properties[i]));
 		}
 
-		return new GeoJsonElement(new Feature(new Point(new SinglePosition(Coordinates.of(point.getLongitude(), point.getLatitude()))), builder.build(), Optional.of(descriptor.getIdProperty())));
+		return new GeoJsonElement(new Feature(point.getGeometry(), builder.build(), Optional.of(descriptor.getIdProperty())));
 	}
 }

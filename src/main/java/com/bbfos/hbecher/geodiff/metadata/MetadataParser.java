@@ -3,8 +3,11 @@ package com.bbfos.hbecher.geodiff.metadata;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.bbfos.hbecher.geodiff.parsers.ParseException;
+import com.bbfos.hbecher.geodiff.parser.ParseException;
 
+/**
+ * This class is used to parse metadata information.
+ */
 public final class MetadataParser
 {
 	/**
@@ -20,11 +23,14 @@ public final class MetadataParser
 	 * Parses the metadata and puts each key-value pair in the map.
 	 *
 	 * @param metadata the raw metadata string
+	 * @return The parsed metadata
+	 * @throws ParseException if the metadata has the wrong syntax
 	 */
 	public Metadata parse(String metadata) throws ParseException
 	{
 		if(metadata == null)
 		{
+			// if no metadata was specified
 			return null;
 		}
 

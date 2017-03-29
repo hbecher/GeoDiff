@@ -1,4 +1,4 @@
-package com.bbfos.hbecher.geodiff.parsers;
+package com.bbfos.hbecher.geodiff.parser;
 
 public class ParseException extends Exception
 {

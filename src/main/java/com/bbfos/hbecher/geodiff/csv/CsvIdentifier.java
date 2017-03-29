@@ -1,6 +1,6 @@
 package com.bbfos.hbecher.geodiff.csv;
 
-import com.bbfos.hbecher.geodiff.elements.Identifier;
+import com.bbfos.hbecher.geodiff.element.Identifier;
 
 public class CsvIdentifier extends Identifier
 {

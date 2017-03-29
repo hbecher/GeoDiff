@@ -5,12 +5,12 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 
-import com.bbfos.hbecher.geodiff.csv.CsvParser;
+import com.bbfos.hbecher.geodiff.geojson.GeoJsonParser;
 import com.bbfos.hbecher.geodiff.metadata.Metadata;
 import com.bbfos.hbecher.geodiff.metadata.MetadataParser;
-import com.bbfos.hbecher.geodiff.parsers.ParseException;
-import com.bbfos.hbecher.geodiff.parsers.ParsedElements;
-import com.bbfos.hbecher.geodiff.parsers.Parser;
+import com.bbfos.hbecher.geodiff.parser.ParseException;
+import com.bbfos.hbecher.geodiff.parser.ParsedElements;
+import com.bbfos.hbecher.geodiff.parser.Parser;
 import joptsimple.*;
 
 /**
@@ -20,14 +20,13 @@ public class Main
 {
 	public static void main(String[] args)
 	{
+		// jopt simple magic
 		OptionParser optionParser = new OptionParser();
 
-		optionParser.allowsUnrecognizedOptions();
-
-		AbstractOptionSpec<Void> help = optionParser.accepts("help").forHelp();
+		AbstractOptionSpec<Void> help = optionParser.accepts("help", "Shows this help message").forHelp();
 		ArgumentAcceptingOptionSpec<String> format = optionParser.accepts("format", "Currently unused, will be used to explicitly specify the format of the input files").withRequiredArg();
 		ArgumentAcceptingOptionSpec<String> metadata = optionParser.accepts("metadata", "Some additional information for the parser (if a custom identifier is used, it can be specified here using 'id' - please note that an uid is required for the program to work)").withRequiredArg().describedAs("META");
-		ArgumentAcceptingOptionSpec<File> output = optionParser.accepts("output", "The output file").withRequiredArg().ofType(File.class).defaultsTo(new File("geodiff.geojson"));
+		ArgumentAcceptingOptionSpec<File> output = optionParser.accepts("output", "The output file (prints to the console if not specified)").withRequiredArg().ofType(File.class);
 		NonOptionArgumentSpec<String> nonOption = optionParser.nonOptions();
 
 		OptionSet optionSet;
@@ -49,8 +48,8 @@ public class Main
 		}
 		else
 		{
-			List<String> leftoverArgs = optionSet.valuesOf(nonOption);
-			int leftOverSize = leftoverArgs.size();
+			List<String> leftOverArgs = optionSet.valuesOf(nonOption);
+			int leftOverSize = leftOverArgs.size();
 
 			if(leftOverSize < 2)
 			{
@@ -62,7 +61,7 @@ public class Main
 			}
 			else
 			{
-				String fileA = leftoverArgs.get(0), fileB = leftoverArgs.get(1);
+				String fileA = leftOverArgs.get(0), fileB = leftOverArgs.get(1);
 				Metadata meta;
 
 				if(optionSet.has(metadata))
@@ -71,7 +70,7 @@ public class Main
 
 					try
 					{
-						meta = metadataParser.parse(metadata.value(optionSet));
+						meta = metadataParser.parse(optionSet.valueOf(metadata));
 					}
 					catch(ParseException e)
 					{
@@ -85,9 +84,9 @@ public class Main
 					meta = null;
 				}
 
-				// The program will (probably?) be able to infer the format in the future
-				// Parser parser = new GeoJsonParser(fileA, fileB, metadata.value(optionSet));
-				Parser parser = new CsvParser(fileA, fileB, meta);
+				// we would specify what format we are reading
+				Parser parser = new GeoJsonParser(fileA, fileB, meta);
+				//Parser parser = new CsvParser(fileA, fileB, meta);
 				ParsedElements parsedElements;
 
 				try
@@ -100,11 +99,10 @@ public class Main
 				}
 
 				GeoDiff geoDiff = new GeoDiff(parsedElements);
-				Features delta = geoDiff.delta();
+				Delta delta = geoDiff.delta();
+				FeatureCollectionWrapper result = new FeatureCollectionWrapper(delta);
 
-				Result result = new Result(delta);
-
-				result.writeFile(output.value(optionSet));
+				result.print(optionSet.has(output) ? optionSet.valueOf(output) : System.out);
 			}
 		}
 	}
@@ -121,6 +119,8 @@ public class Main
 		{
 			System.out.println(errorMsg);
 		}
+
+		System.out.println("Usage: java -jar GeoDiff.jar [OPTIONS] <file A> <file B>");
 
 		try(PrintWriter writer = new PrintWriter(System.out))
 		{

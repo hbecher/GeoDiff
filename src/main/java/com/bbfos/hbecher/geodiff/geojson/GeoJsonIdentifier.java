@@ -1,18 +1,19 @@
 package com.bbfos.hbecher.geodiff.geojson;
 
-import com.bbfos.hbecher.geodiff.elements.Identifier;
+import com.bbfos.hbecher.geodiff.element.Identifier;
+import com.google.gson.JsonElement;
 
 public class GeoJsonIdentifier extends Identifier
 {
-	private final String id;
+	private final JsonElement id;
 
-	public GeoJsonIdentifier(String id)
+	public GeoJsonIdentifier(JsonElement id)
 	{
 		this.id = id;
 	}
 
 	@Override
-	public String getId()
+	public JsonElement getId()
 	{
 		return id;
 	}
@@ -20,6 +21,6 @@ public class GeoJsonIdentifier extends Identifier
 	@Override
 	public String asString()
 	{
-		return id;
+		return id.getAsString();
 	}
 }

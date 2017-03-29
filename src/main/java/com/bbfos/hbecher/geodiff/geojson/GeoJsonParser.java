@@ -5,10 +5,10 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.bbfos.hbecher.geodiff.elements.Element;
+import com.bbfos.hbecher.geodiff.element.Element;
 import com.bbfos.hbecher.geodiff.metadata.Metadata;
-import com.bbfos.hbecher.geodiff.parsers.ParseException;
-import com.bbfos.hbecher.geodiff.parsers.Parser;
+import com.bbfos.hbecher.geodiff.parser.ParseException;
+import com.bbfos.hbecher.geodiff.parser.Parser;
 import com.github.filosganga.geogson.gson.GeometryAdapterFactory;
 import com.github.filosganga.geogson.model.FeatureCollection;
 import com.google.gson.Gson;
@@ -20,10 +20,13 @@ import com.google.gson.stream.JsonReader;
 public class GeoJsonParser extends Parser
 {
 	public static final Gson GSON = new GsonBuilder().registerTypeAdapterFactory(new GeometryAdapterFactory()).create();
+	private final String id;
 
 	public GeoJsonParser(String fileA, String fileB, Metadata metadata)
 	{
 		super(fileA, fileB, metadata);
+
+		this.id = metadata == null ? null : metadata.getId();
 	}
 
 	private static List<Element> toElements(FeatureCollection fc, String id)
@@ -45,8 +48,6 @@ public class GeoJsonParser extends Parser
 			throw new ParseException("An exception occurred while parsing file " + file, e);
 		}
 
-		String id = metadata.getId();
-
-		return featuresCol.features().stream().map(feature -> new GeoJsonElement(feature, id)).collect(Collectors.toList());
+		return toElements(featuresCol, id);
 	}
 }
