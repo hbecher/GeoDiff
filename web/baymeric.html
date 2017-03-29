@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html>
     <!-- http://www.commentcamarche.net/forum/affich-26511139-recuperation-de-valeur-d-un-input-html-en-javascript-->
+    <!--https://www.europeandataportal.eu/data/en/dataset?country=fr&organization=plateforme-ouverte-des-donnees-publiques-francaises&res_format=GeoJSON-->
     <head>
         <meta charset = "UTF-8"/>
         <title>Geodiff</title>
          <script type="text/javascript" src="jquery-3.1.1.min.js"></script>
-         <script type="text/javascript" src="CompareGeojsonGeometry.js"></script>  
+         <!--<script type="text/javascript" src="CompareGeojsonGeometry.js"></script>-->
+          <script type="text/javascript" src="CompareGeojsonGeometryOrdonne.js"></script>  
     </head> 
 
     <body>
@@ -14,9 +16,17 @@
             <input type="text" name="id_name_field" id="id_name_field" value="" />
             
             <input type="button" value="OK" onclick="getID();" />
+
+             <input type="button" value="telecharger" onclick="download();" />
         </FORM> 
         <input id="file" type="file" multiple style="visibility: hidden;" />
-       
+
+
+       <FORM method="POST" action="Transfert.php" id="dataform" hidden>
+            <input type="text" name="data" id="datainput" hidden>
+
+      </FORM> 
+
 
 <script>
     var id_table= new Array();//verif unicite des id 
@@ -38,6 +48,7 @@
     var v = 0 ;
     //garde le nb de supression 
     var reader = new FileReader();
+    var fich_supp="a",fich_modif="b",fich_ajout="c";
     function getID()
     {
         //12:27:05,131 L’utilisation de « getPreventDefault() » est obsolète. Utiliser « defaultPrevented » à la place. geodiff.html
@@ -48,7 +59,23 @@
         //console.log("id:",id_name);
         //return id_name;
     } 
+
+
+     function download(){ 
+       
+            var data =fich_modif +"\n"+ fich_ajout+"\n" +fich_supp ;//envoyer les 3 fichier avec retour a la ligne ?
+            //var data = "4"+"5";
+            //var data ="test\ntest\nimportant";
+            //var data ='[{"type":"Feature","geometry":{"type":"Point","coordinates":[11,12]},"properties":{"AP_ANTENNE1":"TEST_SUP","Antenne 1":"14 rue Albert 1er de Belgique","longitude":"5.732143","latitude":"45.182819"}}]\ntest\nimportant';
+            //console.log(data);
+            var form = document.getElementById('dataform');
+            var input = document.getElementById('datainput');
+            //input.value=urlencode(data);
+            input.value=encodeURIComponent(data);
+            form.submit();
+        }
     
+
     //evenement fin du chargement du fichier 
     reader.addEventListener('loadend', function(){ 
         //console.log("id:",id_name);
@@ -81,7 +108,8 @@
         else{
             for (var j = 0 ; j < myObject[i].features.length ; j = j + 1 ){ //parcours du i eme fichier
                 if (myObject[i].features[j].properties[id_name] in id_table[0]){
-                    //si l' id du feature j du deuxieme fichier existe dans le premier 
+                    //si l' id du feature j du deuxieme fichier existe dans le premier
+                    //console.log( "89 ",myObject[i].features[j].properties[id_name]);
                     numero_de_ligne = id_table[0][myObject[i].features[j].properties[id_name]];
                     //console.log(" j ",j,"numero de ligne",numero_de_ligne);
                     //DEBUG
@@ -103,27 +131,30 @@
                     //si la longueur et le type sont identique
                     if (myObject[i].features[j].geometry.coordinates.length === myObject[1].features[numero_de_ligne].geometry.coordinates.length && myObject[i].features[j].geometry.type === myObject[1].features[numero_de_ligne].geometry.type){
 
-                        for (var l = 0 ; l < myObject[i].features[j].geometry.coordinates.length ){
+                        //for (var l = 0 ; l < myObject[i].features[j].geometry.coordinates.length ; l++ ){
                             //si au moins une coordonne differente => modif 
-                            if (myObject[i].features[j].geometry.coordinates[l] !== myObject[1].features[numero_de_ligne].geometry.coordinates[l]){
-                                 // console.log("modif : ");
-                                myObject[3].push(myObject[i].features[j]);//si les coordonnees sont differente:
-                                // on ajoute cette ligne dans le tableau des modification
-                                break;
+
+                            if (!(CompareGeojsonGeometry( myObject[i].features[j].geometry.coordinates, 
+                                                        myObject[1].features[numero_de_ligne].geometry.coordinates,
+                                                        myObject[i].features[j].geometry.type))){
+                                    console.log("modif 110 : ");
+                                    myObject[3].push(myObject[i].features[j]);//si les coordonnees sont differente:
+                                    // on ajoute cette ligne dans le tableau des modification
+                                    
 
                             }
 
-                        }
+                        //}
 
                     }
                     //sinon c'est une modif (type ou longueur differente )
                     else{
-                        // console.log("modif : ");
+                         console.log("modif 122 : ");
                         myObject[3].push(myObject[i].features[j]);//si les coordonnees sont differente:
                         // on ajoute cette ligne dans le tableau des modification
                     }
                 }else {//si l'id ne correspond a aucun du premier fichier
-                    //console.log("ajout");
+                    console.log("ajout");
                     myObject[4].push(myObject[i].features[j]);//on la place dand le tableau des ajout 
                 }  
             }
@@ -132,45 +163,27 @@
             console.log("supression",myObject[0].features);
             console.log("modif",myObject[3]);
             console.log("ajout",myObject[4]);
+
+            //brouillon en voi serveur 
+
+             fich_supp =JSON.stringify(myObject[0].features);
+                //console.log("tst",tst);
+            //console.log("modif",myObject[3]);
+             fich_modif =JSON.stringify(myObject[3]);
+            //console.log("ajout",myObject[4]);
+             fich_ajout =JSON.stringify(myObject[4]);
+            //console.log("resultat",fich_supp,"\n",fich_modif,"\n",fich_ajout);
+            alert(fich_supp);
+            alert(fich_modif);
+            alert(fich_ajout);
+
+
         }
     });
     fileInput.addEventListener('change', function(){
         reader.readAsText(fileInput.files[0]);   
     }); 
-    /*
-    //envoi au serveur brouillon ci dessous 
-
-    var fich_supp =JSON.stringify(myObject[0].features);
-                //console.log("tst",tst);
-            //console.log("modif",myObject[3]);
-                var fich_modif =JSON.stringify(myObject[3]);
-            //console.log("ajout",myObject[4]);
-                var fich_ajout =JSON.stringify(myObject[4]);
-            i = i + 1 ;
-            console.log("resultat",fich_supp,"\n",fich_modif,"\n",fich_ajout);
-            //envoi requette post au server pour stockage? puis possibilite de telecharger le fichier resultat 
-            //en cours de codage 
-            var xhr_object = null; 
-    
-            if(window.XMLHttpRequest){ // Firefox 
-                xhr_object = new XMLHttpRequest();
-                alert("ok"); 
-                console.log("ici");
-            }else if(window.ActiveXObject){ // Internet Explorer 
-                xhr_object = new ActiveXObject("Microsoft.XMLHTTP"); 
-            }else { // XMLHttpRequest non supporté par le navigateur 
-                alert("Votre navigateur ne supporte pas les objets XMLHTTPRequest..."); 
-            return; 
-            } 
-
-             xhr_object.open("POST","http://localhost",true);
-             xhr_object.setRequestHeader("Content-type","application/json");
-             var data  = "tst";  
-            xhr_object.send(data); 
-
-
-
-    */
+   
 </script>
 	</body>
 
