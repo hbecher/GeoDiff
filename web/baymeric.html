@@ -48,7 +48,9 @@
     var v = 0 ;
     //garde le nb de supression 
     var reader = new FileReader();
-    var fich_supp="a",fich_modif="b",fich_ajout="c";
+    var fich_supp="",fich_modif="",fich_ajout="";
+    var fich_total="";
+    var geodiff_type="geodiff_type" //nom de la propriete a ajouter valeur possible de cette propriete add,del,mod 
     function getID()
     {
         //12:27:05,131 L’utilisation de « getPreventDefault() » est obsolète. Utiliser « defaultPrevented » à la place. geodiff.html
@@ -63,7 +65,7 @@
 
      function download(){ 
        
-            var data =fich_modif +"\n"+ fich_ajout+"\n" +fich_supp ;//envoyer les 3 fichier avec retour a la ligne ?
+            var data =fich_modif +"\n"+ fich_ajout+"\n" +fich_supp+"\n" +fich_total ;//envoyer les 3 fichier avec retour a la ligne ?
             //var data = "4"+"5";
             //var data ="test\ntest\nimportant";
             //var data ='[{"type":"Feature","geometry":{"type":"Point","coordinates":[11,12]},"properties":{"AP_ANTENNE1":"TEST_SUP","Antenne 1":"14 rue Albert 1er de Belgique","longitude":"5.732143","latitude":"45.182819"}}]\ntest\nimportant';
@@ -96,6 +98,10 @@
         if (i === 1){//on copie le premier fichier dans myobjet[0] et myobject[1]
             myObject[0] = jQuery.extend(true,{},myObject[1]);//attention
             i = i + 1;
+            //ajout marqueur de deletion  dans les propriete a tester 
+            for (var l = 0 ; l < myObject[0].features.length ; l = l + 1 ){
+                    myObject[0].features[l].properties[geodiff_type]="del";
+            }
             /*
             //test copie par val et pas par ref 
             console.log(myObject[0]);
@@ -138,8 +144,11 @@
                                                         myObject[1].features[numero_de_ligne].geometry.coordinates,
                                                         myObject[i].features[j].geometry.type))){
                                     console.log("modif 110 : ");
+
                                     myObject[3].push(myObject[i].features[j]);//si les coordonnees sont differente:
                                     // on ajoute cette ligne dans le tableau des modification
+                                    //ajout marqueur de modif dans les propriete a tester 
+                                    myObject[3][myObject[3].length -1].properties[geodiff_type]="mod";
                                     
 
                             }
@@ -152,10 +161,14 @@
                          console.log("modif 122 : ");
                         myObject[3].push(myObject[i].features[j]);//si les coordonnees sont differente:
                         // on ajoute cette ligne dans le tableau des modification
+                        //ajout marqueur de modif dans les propriete a tester 
+                        myObject[3][myObject[3].length -1].properties[geodiff_type]="mod";
                     }
                 }else {//si l'id ne correspond a aucun du premier fichier
                     console.log("ajout");
-                    myObject[4].push(myObject[i].features[j]);//on la place dand le tableau des ajout 
+                    myObject[4].push(myObject[i].features[j]);//on la place dand le tableau des ajout
+                    //ajout marqueur d'ajout dans les propriete a tester 
+                    myObject[4][myObject[4].length -1].properties[geodiff_type]="add"; 
                 }  
             }
             console.log("fichier 1:",myObject[1]);
@@ -167,15 +180,20 @@
             //brouillon en voi serveur 
 
              fich_supp =JSON.stringify(myObject[0].features);
+             fich_supp = fich_supp.substring(1,fich_supp.length-1)
                 //console.log("tst",tst);
             //console.log("modif",myObject[3]);
              fich_modif =JSON.stringify(myObject[3]);
+             fich_modif = fich_modif.substring(1,fich_modif.length-1)
             //console.log("ajout",myObject[4]);
              fich_ajout =JSON.stringify(myObject[4]);
+             fich_ajout = fich_ajout.substring(1,fich_ajout.length-1)
             //console.log("resultat",fich_supp,"\n",fich_modif,"\n",fich_ajout);
-            alert(fich_supp);
-            alert(fich_modif);
-            alert(fich_ajout);
+            //alert(fich_supp);
+            //alert(fich_modif);
+            //alert(fich_ajout);
+            fich_total='{"type":"FeatureCollection","features":['+fich_modif+","+fich_ajout+","+fich_supp+"]}";
+            //le zip contiendra 4 fichier 1 avec toutes les differences 3 autre selon le type de differences format geojson
 
 
         }
