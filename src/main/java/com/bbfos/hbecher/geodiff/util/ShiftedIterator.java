@@ -2,64 +2,138 @@ package com.bbfos.hbecher.geodiff.util;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.function.Consumer;
 
+/**
+ * An iterator that traverses a virtually left-shifted list.
+ * <br><br>
+ * For example, if we consider the list {@code l = [1, 5, 9, 7, 3, 0]}, a shifted iterator over {@code l} starting at index {@code 4}
+ * would iterate over {@code [7, 3, 0, 1, 5, 9]}.
+ * <br><br>
+ * This is especially useful when testing if two cyclical lists describe the same cycle.
+ * <br><br>
+ * The {@link Iterator#remove() remove} operation is supported.
+ *
+ * @param <T> the type of elements returned by this iterator
+ * @see #ShiftedIterator(List, int)
+ */
 public class ShiftedIterator<T> implements Iterator<T>
 {
-	private final int index;
 	private List<T> list;
-	private int pos = 0, lastRet = -1;
+	private int start, pos = -1;
+	private boolean removed = false;
 
-	public ShiftedIterator(List<T> list, int index)
+	/**
+	 * Creates a {@code ShiftedIterator} with the start index set at {@code 0}.<br>
+	 * This is equivalent to a regular {@link Iterator}.
+	 *
+	 * @param list the list to iterate over
+	 * @see #ShiftedIterator(List, int)
+	 */
+	public ShiftedIterator(List<T> list)
 	{
+		this(list, 0);
+	}
+
+	/**
+	 * Creates a {@code ShiftedIterator} with the specified start index.
+	 * The start index must lie between {@code 0} (inclusive) and the size of the list (exclusive).
+	 *
+	 * @param list  the list to iterate over
+	 * @param start the start index
+	 * @see #ShiftedIterator(List)
+	 */
+	public ShiftedIterator(List<T> list, int start)
+	{
+		Objects.requireNonNull(list);
+
+		if(start < 0)
+		{
+			throw new IllegalArgumentException("start < 0");
+		}
+
+		if(start >= list.size())
+		{
+			throw new IllegalArgumentException("start >= list.size()");
+		}
+
 		this.list = list;
-		this.index = index;
+		this.start = start;
+	}
+
+	/**
+	 * Returns {@link Math#floorMod(int, int) Math.floorMod}{@code (pos + start, size)}
+	 *
+	 * @param pos   the current position within {@code 0} and {@code size - 1}
+	 * @param start the start of the iteration
+	 * @param size  the size of the list
+	 * @return {@code Math.floorMod(pos + start, size)}
+	 */
+	private static int mod(int pos, int start, int size)
+	{
+		return Math.floorMod(pos + start, size);
 	}
 
 	@Override
 	public boolean hasNext()
 	{
-		return pos < list.size();
+		return pos < list.size() - 1;
 	}
 
 	@Override
-	public T next()
+	public T next() throws NoSuchElementException
 	{
 		int size = list.size();
-		T next = pos < size ? list.get((pos + index) % size) : null;
 
-		lastRet = -1;
-		pos++;
+		if(pos >= size)
+		{
+			throw new NoSuchElementException();
+		}
 
-		return next;
+		removed = false;
+
+		return list.get(mod(++pos, start, size));
 	}
 
+	/**
+	 * @throws IllegalStateException if the last element returned by this iterator has already been removed
+	 *                               or if the end of iteration has been reached
+	 */
 	@Override
 	public void remove()
 	{
-		if(pos >= list.size())
+		int size = list.size();
+
+		if(pos >= size)
 		{
 			throw new IllegalStateException("End of iteration reached");
 		}
 
-		if(lastRet != -1)
+		if(removed)
 		{
 			throw new IllegalStateException("Element already removed");
 		}
 
-		list.remove(pos);
+		list.remove(mod(pos--, start, size));
 
-		lastRet = pos;
+		if(pos + start >= list.size())
+		{
+			start--;
+		}
+
+		removed = true;
 	}
 
 	@Override
 	public void forEachRemaining(Consumer<? super T> action)
 	{
-		int size = list.size();
+		Objects.requireNonNull(action);
 
-		if(pos < size)
+		while(hasNext())
 		{
-			list.subList(pos, size).forEach(action);
+			action.accept(next());
 		}
 	}
 }

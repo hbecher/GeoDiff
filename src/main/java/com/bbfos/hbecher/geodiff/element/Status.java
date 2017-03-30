@@ -31,7 +31,7 @@ public enum Status
 	 *
 	 * @return The Json object.
 	 */
-	public JsonPrimitive asJsonElement()
+	public JsonPrimitive toJson()
 	{
 		return new JsonPrimitive(name);
 	}

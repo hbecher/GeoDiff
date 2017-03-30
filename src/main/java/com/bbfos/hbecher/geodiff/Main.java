@@ -3,8 +3,10 @@ package com.bbfos.hbecher.geodiff;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.EnumSet;
 import java.util.List;
 
+import com.bbfos.hbecher.geodiff.element.Status;
 import com.bbfos.hbecher.geodiff.geojson.GeoJsonParser;
 import com.bbfos.hbecher.geodiff.metadata.Metadata;
 import com.bbfos.hbecher.geodiff.metadata.MetadataParser;
@@ -100,9 +102,16 @@ public class Main
 
 				GeoDiff geoDiff = new GeoDiff(parsedElements);
 				Delta delta = geoDiff.delta();
-				FeatureCollectionWrapper result = new FeatureCollectionWrapper(delta);
+				FeatureCollectionWrapper result = new FeatureCollectionWrapper(delta, EnumSet.allOf(Status.class));
 
-				result.print(optionSet.has(output) ? optionSet.valueOf(output) : System.out);
+				if(optionSet.has(output))
+				{
+					result.writeTo(optionSet.valueOf(output));
+				}
+				else
+				{
+					result.writeTo(System.out);
+				}
 			}
 		}
 	}

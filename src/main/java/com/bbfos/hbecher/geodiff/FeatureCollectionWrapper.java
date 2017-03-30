@@ -1,10 +1,14 @@
 package com.bbfos.hbecher.geodiff;
 
 import static com.bbfos.hbecher.geodiff.geojson.GeoJsonParser.GSON;
+import static com.bbfos.hbecher.geodiff.util.Utils.toFeatures;
 
 import java.io.*;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 
+import com.bbfos.hbecher.geodiff.element.Status;
 import com.github.filosganga.geogson.model.Feature;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonWriter;
@@ -20,12 +24,17 @@ public class FeatureCollectionWrapper
 	private final String type = "FeatureCollection"; // we force the type to be written
 	private final List<Feature> features;
 
-	public FeatureCollectionWrapper(Delta delta)
+	public FeatureCollectionWrapper(Delta delta, EnumSet<Status> statuses)
 	{
-		this.features = delta.getFeatures();
+		this.features = Collections.unmodifiableList(toFeatures(delta.filter(statuses)));
 	}
 
-	public void write(Writer output)
+	public List<Feature> getFeatures()
+	{
+		return features;
+	}
+
+	private void write(Writer output)
 	{
 		try(JsonWriter writer = GSON.newJsonWriter(output))
 		{
@@ -39,41 +48,34 @@ public class FeatureCollectionWrapper
 		}
 	}
 
-	public void print(Object output)
+	public void writeTo(Writer writer)
 	{
-		if(output == null)
-		{
-			throw new NullPointerException();
-		}
-
-		Writer writer;
-
-		if(output instanceof Writer)
-		{
-			writer = (Writer) output;
-		}
-		else if(output instanceof OutputStream)
-		{
-			writer = new OutputStreamWriter((OutputStream) output);
-		}
-		else if(output instanceof File)
-		{
-			File file = (File) output;
-
-			try
-			{
-				writer = new FileWriter(file);
-			}
-			catch(IOException e)
-			{
-				throw new RuntimeException("Could not write to file " + file.getAbsolutePath(), e);
-			}
-		}
-		else
-		{
-			throw new IllegalArgumentException("Unrecognized output type, received object of class " + output.getClass());
-		}
-
 		write(writer);
+	}
+
+	public void writeTo(OutputStream stream)
+	{
+		try(Writer writer = new OutputStreamWriter(stream))
+		{
+			write(writer);
+		}
+		catch(IOException ignored)
+		{
+		}
+	}
+
+	public void writeTo(File file)
+	{
+		try(Writer writer = new FileWriter(file))
+		{
+			write(writer);
+		}
+		catch(FileNotFoundException e)
+		{
+			throw new RuntimeException("Invalid file path: " + file.getAbsolutePath(), e);
+		}
+		catch(IOException ignored)
+		{
+		}
 	}
 }
