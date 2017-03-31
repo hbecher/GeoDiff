@@ -1,14 +1,12 @@
 package com.bbfos.hbecher.geodiff.util;
 
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.bbfos.hbecher.geodiff.element.Element;
-import com.bbfos.hbecher.geodiff.element.Status;
 import com.github.filosganga.geogson.model.*;
 import com.github.filosganga.geogson.model.positions.LinearPositions;
 import com.github.filosganga.geogson.model.positions.Positions;
@@ -36,33 +34,6 @@ public class Utils
 	public static List<Feature> toFeatures(List<Element> elements)
 	{
 		return elements.stream().map(element -> element.toGeoJsonElement().getFeature().withProperty(GEODIFF_PROPERTY, element.getStatus().toJson())).collect(Collectors.toList());
-	}
-
-	public static EnumSet<Status> getFilters(boolean add, boolean del, boolean mod, boolean id)
-	{
-		EnumSet<Status> statuses = EnumSet.noneOf(Status.class);
-
-		if(add)
-		{
-			statuses.add(Status.ADDITION);
-		}
-
-		if(del)
-		{
-			statuses.add(Status.DELETION);
-		}
-
-		if(mod)
-		{
-			statuses.add(Status.MODIFICATION);
-		}
-
-		if(id)
-		{
-			statuses.add(Status.IDENTICAL);
-		}
-
-		return statuses;
 	}
 
 	/**

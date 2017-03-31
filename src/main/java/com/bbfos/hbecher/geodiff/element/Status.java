@@ -1,5 +1,7 @@
 package com.bbfos.hbecher.geodiff.element;
 
+import java.util.Arrays;
+
 import com.google.gson.JsonPrimitive;
 
 /**
@@ -7,13 +9,20 @@ import com.google.gson.JsonPrimitive;
  */
 public enum Status
 {
-	ADDITION("add"), DELETION("del"), IDENTICAL("id"), MODIFICATION("mod"), UNDEFINED("undef");
+	ADDITION("add"), DELETION("del"), OLD_VERSION("old"), NEW_VERSION("new"), /**
+ * Kept for backward compatibility
+ */@Deprecated MODIFICATION("mod"), IDENTICAL("id"), UNDEFINED("undef");
 
 	private final String name;
 
 	Status(String name)
 	{
 		this.name = name;
+	}
+
+	public static Status byName(String name)
+	{
+		return Arrays.stream(values()).filter(status -> status.name.equalsIgnoreCase(name)).findFirst().orElse(null);
 	}
 
 	/**

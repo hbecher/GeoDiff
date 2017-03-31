@@ -12,7 +12,6 @@ import com.bbfos.hbecher.geodiff.metadata.Metadata;
 import com.bbfos.hbecher.geodiff.metadata.MetadataParser;
 import com.bbfos.hbecher.geodiff.parser.ParseException;
 import com.bbfos.hbecher.geodiff.parser.ParsedElements;
-import com.bbfos.hbecher.geodiff.parser.Parser;
 import joptsimple.*;
 
 /**
@@ -26,9 +25,9 @@ public class Main
 		OptionParser optionParser = new OptionParser();
 
 		AbstractOptionSpec<Void> help = optionParser.accepts("help", "Shows this help message").forHelp();
-		ArgumentAcceptingOptionSpec<String> format = optionParser.accepts("format", "Currently unused, will be used to explicitly specify the format of the input files").withRequiredArg();
-		ArgumentAcceptingOptionSpec<String> metadata = optionParser.accepts("metadata", "Some additional information for the parser (if a custom identifier is used, it can be specified here using 'id' - please note that an uid is required for the program to work)").withRequiredArg().describedAs("META");
-		ArgumentAcceptingOptionSpec<File> output = optionParser.accepts("output", "The output file (prints to the console if not specified)").withRequiredArg().ofType(File.class);
+		ArgumentAcceptingOptionSpec<String> filters = optionParser.accepts("filters", "The list of statuses to keep, separated by commas - possible values: 'add', 'del', 'old' (old versions), 'new' (new versions), 'mod' (all previous ones), 'id' (unchanged) and 'undef' (the ones that couldn't be processed, for some reason)").withRequiredArg().describedAs("FILTERS");
+		ArgumentAcceptingOptionSpec<String> metadata = optionParser.accepts("metadata", "Some additional information for the parser").withRequiredArg().describedAs("META");
+		ArgumentAcceptingOptionSpec<File> output = optionParser.accepts("output", "The output file (prints to the console if not specified)").withRequiredArg().ofType(File.class).describedAs("OUTPUT");
 		NonOptionArgumentSpec<String> nonOption = optionParser.nonOptions();
 
 		OptionSet optionSet;
@@ -63,16 +62,40 @@ public class Main
 			}
 			else
 			{
-				String fileA = leftOverArgs.get(0), fileB = leftOverArgs.get(1);
+				EnumSet<Status> statuses;
+
+				if(optionSet.has(filters))
+				{
+					statuses = EnumSet.noneOf(Status.class);
+
+					for(String filter : optionSet.valueOf(filters).split(","))
+					{
+						Status status = Status.byName(filter);
+
+						if(status == null)
+						{
+							showHelp("Received invalid filter: " + filter, optionParser);
+
+							return;
+						}
+
+						statuses.add(status);
+					}
+				}
+				else
+				{
+					statuses = EnumSet.allOf(Status.class);
+				}
+
 				Metadata meta;
 
 				if(optionSet.has(metadata))
 				{
-					MetadataParser metadataParser = new MetadataParser();
-
 					try
 					{
-						meta = metadataParser.parse(optionSet.valueOf(metadata));
+						MetadataParser parser = new MetadataParser();
+
+						meta = parser.parse(optionSet.valueOf(metadata));
 					}
 					catch(ParseException e)
 					{
@@ -87,12 +110,14 @@ public class Main
 				}
 
 				// we would specify what format we are reading
-				Parser parser = new GeoJsonParser(fileA, fileB, meta);
+				String fileA = leftOverArgs.get(0), fileB = leftOverArgs.get(1);
 				//Parser parser = new CsvParser(fileA, fileB, meta);
 				ParsedElements parsedElements;
 
 				try
 				{
+					GeoJsonParser parser = new GeoJsonParser(fileA, fileB, meta);
+
 					parsedElements = parser.parse();
 				}
 				catch(ParseException e)
@@ -102,7 +127,8 @@ public class Main
 
 				GeoDiff geoDiff = new GeoDiff(parsedElements);
 				Delta delta = geoDiff.delta();
-				FeatureCollectionWrapper result = new FeatureCollectionWrapper(delta, EnumSet.allOf(Status.class));
+
+				FeatureCollectionWrapper result = new FeatureCollectionWrapper(delta, statuses);
 
 				if(optionSet.has(output))
 				{
@@ -129,7 +155,7 @@ public class Main
 			System.out.println(errorMsg);
 		}
 
-		System.out.println("Usage: java -jar GeoDiff.jar [OPTIONS] <file A> <file B>");
+		System.out.println("Usage: java -jar GeoDiff.jar [OPTIONS...] <file A> <file B>");
 
 		try(PrintWriter writer = new PrintWriter(System.out))
 		{

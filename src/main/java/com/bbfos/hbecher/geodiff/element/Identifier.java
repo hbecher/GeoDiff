@@ -31,6 +31,6 @@ public abstract class Identifier
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + "{id=" + asString() + '}';
+		return getClass().getSimpleName() + "{" + "id=" + asString() + "}";
 	}
 }

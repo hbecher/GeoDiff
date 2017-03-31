@@ -1,9 +1,11 @@
 package com.bbfos.hbecher.geodiff.element;
 
+import java.util.Arrays;
+
 import com.github.filosganga.geogson.model.Geometry;
 
 /**
- * Represents the type of an {@link Element}.<br>
+ * Represents the name of an {@link Element}.<br>
  * Supported types are:
  * <ul>
  * <li>{@code Point}</li>
@@ -14,30 +16,22 @@ import com.github.filosganga.geogson.model.Geometry;
  * <li>{@code MultiPolygon}</li>
  * <li>{@code GeometryCollection}</li>
  * </ul>
- * The {@code Unknown} type is used if type is not recognized.
+ * The {@code Unknown} name is used if name is not recognized.
  */
 public enum Type
 {
 	POINT("Point"), LINE_STRING("LineString"), POLYGON("Polygon"), MULTI_POINT("MultiPoint"), MULTI_LINE_STRING("MultiLineString"), MULTI_POLYGON("MultiPolygon"), GEOMETRY_COLLECTION("GeometryCollection"), UNKNOWN("Unknown");
 
-	private final String type;
+	private final String name;
 
-	Type(String type)
+	Type(String name)
 	{
-		this.type = type;
+		this.name = name;
 	}
 
-	public static Type get(String name)
+	public static Type byName(String name)
 	{
-		for(Type type : values())
-		{
-			if(type.getType().equalsIgnoreCase(name))
-			{
-				return type;
-			}
-		}
-
-		return UNKNOWN;
+		return Arrays.stream(values()).filter(type -> type.name.equalsIgnoreCase(name)).findFirst().orElse(null);
 	}
 
 	public static Type from(Geometry.Type type)
@@ -87,8 +81,8 @@ public enum Type
 		}
 	}
 
-	public String getType()
+	public String getName()
 	{
-		return type;
+		return name;
 	}
 }

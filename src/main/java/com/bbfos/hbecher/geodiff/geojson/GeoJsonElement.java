@@ -24,13 +24,14 @@ public class GeoJsonElement extends Element
 		this(feature, null);
 	}
 
-	// propertyId != null ==> use feature.properties.<propertyId> ad uid
+	// propsIds != null && propsIds.length > 0 ==> use feature.properties.[propsIds] ad uid
+	// propsIds != null && propsIds.length == 0 ==> use all properties as uid
 	// otherwise use standard GeoJSON uid feature.id
-	public GeoJsonElement(Feature feature, String propertyId)
+	public GeoJsonElement(Feature feature, String[] propsIds)
 	{
 		JsonElement uid;
 
-		if(propertyId == null)
+		if(propsIds == null)
 		{
 			Optional<String> optId = feature.id();
 
@@ -43,32 +44,39 @@ public class GeoJsonElement extends Element
 				throw new IllegalArgumentException("Feature has no valid id");
 			}
 		}
-		else if(propertyId.isEmpty())
+		else
 		{
 			JsonObject obj = new JsonObject();
 
-			for(Map.Entry<String, JsonElement> entry : feature.properties().entrySet())
+			if(propsIds.length == 0)
 			{
-				obj.add(entry.getKey(), entry.getValue());
+				for(Map.Entry<String, JsonElement> entry : feature.properties().entrySet())
+				{
+					obj.add(entry.getKey(), entry.getValue());
+				}
+			}
+			else
+			{
+				for(String property : propsIds)
+				{
+					JsonElement e = feature.properties().get(property);
+
+					if(e == null)
+					{
+						throw new IllegalArgumentException("Feature has no property " + property);
+					}
+
+					obj.add(property, e);
+				}
 			}
 
 			uid = obj;
 		}
-		else
-		{
-			uid = feature.properties().get(propertyId);
-
-			if(uid == null)
-			{
-				throw new IllegalArgumentException("Feature has no valid id");
-			}
-		}
 
 		this.feature = feature;
-		this.id = new GeoJsonIdentifier(uid);
-		this.type = Type.from(feature.geometry().type());
-
-		this.coordinates = new Coordinates(feature.geometry());
+		id = new GeoJsonIdentifier(uid);
+		type = Type.from(feature.geometry().type());
+		coordinates = new Coordinates(feature.geometry());
 	}
 
 	public Feature getFeature()

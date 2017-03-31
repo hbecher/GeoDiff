@@ -20,16 +20,21 @@ import com.google.gson.stream.JsonReader;
 public class GeoJsonParser extends Parser
 {
 	public static final Gson GSON = new GsonBuilder().registerTypeAdapterFactory(new GeometryAdapterFactory()).create();
-	private final String id;
+	private final String[] id;
 
 	public GeoJsonParser(String fileA, String fileB, Metadata metadata)
 	{
 		super(fileA, fileB, metadata);
 
-		this.id = metadata == null ? null : metadata.getId();
+		this.id = metadata == null ? null : getIdentifiers(metadata.getId());
 	}
 
-	private static List<Element> toElements(FeatureCollection fc, String id)
+	private static String[] getIdentifiers(String id)
+	{
+		return id == null ? null : id.isEmpty() ? new String[0] : id.split(",");
+	}
+
+	private static List<Element> toElements(FeatureCollection fc, String[] id)
 	{
 		return fc.features().stream().map(feature -> new GeoJsonElement(feature, id)).collect(Collectors.toList());
 	}

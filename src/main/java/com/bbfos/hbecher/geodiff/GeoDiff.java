@@ -46,7 +46,7 @@ public class GeoDiff
 	 * Returns the {@code Element} with the same {@code Identifier} as {@code toTest} within {@code elements} if not already visited, {@code null} otherwise.
 	 *
 	 * @param elements the elements
-	 * @param toTest   the {@code Element} to test
+	 * @param toTest   the {@code Element} to com.bbfos.hbecher.geodiff.test
 	 * @param visited  the {@code boolean} array keeping track of already visited elements
 	 * @return The {@code Element} counterpart of {@code toTest} within {@code elements} or {@code null} if already visited.
 	 */
@@ -81,10 +81,18 @@ public class GeoDiff
 		for(Element element : elementsA)
 		{
 			Element e = counterpart(elementsB, element, visited);
+			Status status = e == null ? Status.DELETION : element.equals(e) ? Status.IDENTICAL : Status.OLD_VERSION;
 
-			element.setStatus(e == null ? Status.DELETION : element.equals(e) ? Status.IDENTICAL : Status.MODIFICATION);
+			element.setStatus(status);
 
 			result.add(element);
+
+			if(status == Status.OLD_VERSION)
+			{
+				e.setStatus(Status.NEW_VERSION);
+
+				result.add(e);
+			}
 		}
 
 		for(int i = 0; i < visited.length; i++)

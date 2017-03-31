@@ -41,9 +41,19 @@ public class Delta
 		return filter(EnumSet.of(Status.DELETION));
 	}
 
+	public List<Element> getOldVersions()
+	{
+		return filter(EnumSet.of(Status.OLD_VERSION));
+	}
+
+	public List<Element> getNewVersions()
+	{
+		return filter(EnumSet.of(Status.NEW_VERSION));
+	}
+
 	public List<Element> getModifications()
 	{
-		return filter(EnumSet.of(Status.MODIFICATION));
+		return filter(EnumSet.of(Status.ADDITION, Status.DELETION, Status.OLD_VERSION, Status.NEW_VERSION));
 	}
 
 	public List<Element> getIdentical()

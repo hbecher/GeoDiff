@@ -3,22 +3,24 @@ package com.bbfos.hbecher.geodiff.metadata;
 import java.util.Map;
 
 /**
- * An object that holds the parsed metadata arguments passed via the {@code --metadata} option.<br>
- * The metadata should always contain the {@link com.bbfos.hbecher.geodiff.element.Identifier unique identifier}.
+ * An object that holds the parsed metadata arguments passed via the {@code --metadata} option.<br><br>
+ * The metadata gives information to the parsers, such as what {@link com.bbfos.hbecher.geodiff.element.Identifier uniquely identifies} each element.
+ * At the moment, it is only used to give a custom identifier for GeoJSON elements
+ * (if they don't have the default one, such as one or more of their properties) and describe the fields of CSV files.<br>
+ * The uid can be accessed using the {@link #getId()} method, provided it was specified. The name of the uid key is {@value ID}.
  */
 public class Metadata
 {
 	/**
-	 * The unique identifier key in the metadata.
+	 * The unique identifier key.
 	 */
 	private static final String ID = "id";
 	private final Map<String, String> metadata;
 
 	/**
-	 * Creates a {@code Metadata} by parsing the given {@code String}.<br>
-	 * {@code} metadata has to be non-null and non-empty.
+	 * The constructor.
 	 *
-	 * @param metadata the metadata string
+	 * @param metadata the metadata mapping
 	 */
 	Metadata(Map<String, String> metadata)
 	{

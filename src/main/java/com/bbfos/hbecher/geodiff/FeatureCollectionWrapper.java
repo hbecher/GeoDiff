@@ -14,7 +14,7 @@ import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonWriter;
 
 /**
- * Represents the final result, to be written to the output file.
+ * Represents the final result, ready to be written.
  */
 public class FeatureCollectionWrapper
 {
