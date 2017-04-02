@@ -14,14 +14,15 @@ import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonWriter;
 
 /**
- * Represents the final result, ready to be written.
+ * Encapsulates the final result so it is written with the type FeatureCollection.
  */
 public class FeatureCollectionWrapper
 {
 	/**
-	 * The type of GeoJSON object we are writing.
+	 * The type of GeoJSON object we are writing.<br>
+	 * It is a member of the class so that the type is written by the JsonWriter.
 	 */
-	private final String type = "FeatureCollection"; // we force the type to be written
+	private final String type = "FeatureCollection";
 	private final List<Feature> features;
 
 	public FeatureCollectionWrapper(Delta delta, EnumSet<Status> statuses)

@@ -1,5 +1,8 @@
 package com.bbfos.hbecher.geodiff.csv;
 
+/**
+ * Work in progress.
+ */
 class CsvDescriptor
 {
 	private final String[] properties;
@@ -49,5 +52,10 @@ class CsvDescriptor
 		}
 
 		throw new IllegalArgumentException("Invalid CSV descriptor");
+	}
+
+	public int getNumOfProperties()
+	{
+		return properties.length;
 	}
 }

@@ -1,20 +1,18 @@
 package com.bbfos.hbecher.geodiff.util;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
  * An iterator that traverses a virtually left-shifted list.
  * <br><br>
  * For example, if we consider the list {@code l = [1, 5, 9, 7, 3, 0]}, a shifted iterator over {@code l} starting at index {@code 4}
- * would iterate over {@code [7, 3, 0, 1, 5, 9]}.
+ * would iterate over {@code [7, 3, 0, 1, 5, 9]}.<br>
+ * This is especially useful when testing if two lists describe the same cycle.
  * <br><br>
- * This is especially useful when testing if two cyclical lists describe the same cycle.
+ * The {@link Iterator#remove()} operation is supported.
  * <br><br>
- * The {@link Iterator#remove() remove} operation is supported.
+ * <b>This iterator is not thread safe, nor does it detect concurrent modifications.</b>
  *
  * @param <T> the type of elements returned by this iterator
  * @see #ShiftedIterator(List, int)
@@ -22,7 +20,7 @@ import java.util.function.Consumer;
 public class ShiftedIterator<T> implements Iterator<T>
 {
 	private List<T> list;
-	private int start, pos = -1;
+	private int start, pos = -1, expectedSize, lastHashCode;
 	private boolean removed = false;
 
 	/**
@@ -61,6 +59,8 @@ public class ShiftedIterator<T> implements Iterator<T>
 
 		this.list = list;
 		this.start = start;
+		expectedSize = list.size();
+		lastHashCode = list.hashCode();
 	}
 
 	/**
@@ -87,6 +87,11 @@ public class ShiftedIterator<T> implements Iterator<T>
 	{
 		int size = list.size();
 
+		if(size != expectedSize || list.hashCode() != lastHashCode)
+		{
+			throw new ConcurrentModificationException();
+		}
+
 		if(pos >= size)
 		{
 			throw new NoSuchElementException();
@@ -106,6 +111,18 @@ public class ShiftedIterator<T> implements Iterator<T>
 	{
 		int size = list.size();
 
+		if(size != expectedSize)
+		{
+			throw new ConcurrentModificationException();
+		}
+
+		int hashCode = list.hashCode();
+
+		if(hashCode != lastHashCode)
+		{
+			throw new ConcurrentModificationException();
+		}
+
 		if(pos >= size)
 		{
 			throw new IllegalStateException("End of iteration reached");
@@ -123,6 +140,8 @@ public class ShiftedIterator<T> implements Iterator<T>
 			start--;
 		}
 
+		expectedSize--;
+		lastHashCode = hashCode;
 		removed = true;
 	}
 

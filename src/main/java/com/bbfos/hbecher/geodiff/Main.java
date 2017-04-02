@@ -25,7 +25,7 @@ public class Main
 		OptionParser optionParser = new OptionParser();
 
 		AbstractOptionSpec<Void> help = optionParser.accepts("help", "Shows this help message").forHelp();
-		ArgumentAcceptingOptionSpec<String> filters = optionParser.accepts("filters", "The list of statuses to keep, separated by commas - possible values: 'add', 'del', 'old' (old versions), 'new' (new versions), 'mod' (all previous ones), 'id' (unchanged) and 'undef' (the ones that couldn't be processed, for some reason)").withRequiredArg().describedAs("FILTERS");
+		ArgumentAcceptingOptionSpec<String> filters = optionParser.accepts("filters", "The list of statuses to keep, separated by commas - possible values: 'add' (additions), 'del' (deletions), 'old' (old versions), 'new' (new versions), 'mod' (all previous ones), 'id' (unchanged) and 'undef' (the ones that couldn't be processed, for some reason)").withRequiredArg().describedAs("FILTERS");
 		ArgumentAcceptingOptionSpec<String> metadata = optionParser.accepts("metadata", "Some additional information for the parser").withRequiredArg().describedAs("META");
 		ArgumentAcceptingOptionSpec<File> output = optionParser.accepts("output", "The output file (prints to the console if not specified)").withRequiredArg().ofType(File.class).describedAs("OUTPUT");
 		NonOptionArgumentSpec<String> nonOption = optionParser.nonOptions();
@@ -109,7 +109,8 @@ public class Main
 					meta = null;
 				}
 
-				// we would specify what format we are reading
+				// we would specify what format we are reading in future versions
+				// if more formats are supported
 				String fileA = leftOverArgs.get(0), fileB = leftOverArgs.get(1);
 				//Parser parser = new CsvParser(fileA, fileB, meta);
 				ParsedElements parsedElements;
@@ -122,7 +123,9 @@ public class Main
 				}
 				catch(ParseException e)
 				{
-					throw new RuntimeException(e);
+					System.err.println(e.getMessage());
+
+					return;
 				}
 
 				GeoDiff geoDiff = new GeoDiff(parsedElements);

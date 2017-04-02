@@ -12,26 +12,52 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
+/**
+ * Represents a GeoJSON element.
+ *
+ * @see #GeoJsonElement(Feature, String[])
+ */
 public class GeoJsonElement extends Element
 {
 	private final Feature feature;
-	private final Identifier id;
+	private final GeoJsonIdentifier id;
 	private final Type type;
 	private final Coordinates coordinates;
 
+	/**
+	 * Convenient constructor that uses a {@code null} identifier,
+	 * corresponding to the identifier defined by the GeoJSON standard.
+	 *
+	 * @param feature the feature
+	 */
 	public GeoJsonElement(Feature feature)
 	{
 		this(feature, null);
 	}
 
-	// propsIds != null && propsIds.length > 0 ==> use feature.properties.[propsIds] ad uid
-	// propsIds != null && propsIds.length == 0 ==> use all properties as uid
-	// otherwise use standard GeoJSON uid feature.id
-	public GeoJsonElement(Feature feature, String[] propsIds)
+	/**
+	 * Creates a {@code GeoJsonElement} from the given {@code Feature} identified by the given properties.<br>
+	 * Depending on the value of {@code idKeys} the uid will be one of the following:
+	 * <ul>
+	 * <li>if {@code idKeys == null}, then the standard GeoJSON uid will be used</li>
+	 * <li>if {@code idKeys.length == 0}, then all properties will be used as the uid</li>
+	 * <li>if {@code idKeys.length > 0}, then the given properties will be used as the uid</li>
+	 * </ul>
+	 * A uid is considered invalid if
+	 * <ul>
+	 * <li>the Feature doesn't have the standard GeoJSON "id" key</li>
+	 * <li>at least one of the given properties doesn't exist</li>
+	 * </ul>
+	 *
+	 * @param feature the feature
+	 * @param idKeys  a list of properties to use as an identifier
+	 * @throws IllegalArgumentException if the id given is invalid
+	 */
+	public GeoJsonElement(Feature feature, String[] idKeys)
 	{
 		JsonElement uid;
 
-		if(propsIds == null)
+		if(idKeys == null)
 		{
 			Optional<String> optId = feature.id();
 
@@ -48,7 +74,7 @@ public class GeoJsonElement extends Element
 		{
 			JsonObject obj = new JsonObject();
 
-			if(propsIds.length == 0)
+			if(idKeys.length == 0)
 			{
 				for(Map.Entry<String, JsonElement> entry : feature.properties().entrySet())
 				{
@@ -57,7 +83,7 @@ public class GeoJsonElement extends Element
 			}
 			else
 			{
-				for(String property : propsIds)
+				for(String property : idKeys)
 				{
 					JsonElement e = feature.properties().get(property);
 

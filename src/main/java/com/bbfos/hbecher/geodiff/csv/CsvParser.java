@@ -12,6 +12,9 @@ import com.bbfos.hbecher.geodiff.metadata.Metadata;
 import com.bbfos.hbecher.geodiff.parser.ParseException;
 import com.bbfos.hbecher.geodiff.parser.Parser;
 
+/**
+ * Work in progress.
+ */
 public class CsvParser extends Parser
 {
 	private final String id, lonId, latId;
@@ -25,9 +28,9 @@ public class CsvParser extends Parser
 			throw new NullPointerException("Metadata is required for the uid, longitude and latitude descriptors");
 		}
 
-		id = this.metadata.getId();
-		lonId = this.metadata.getMetadata("lon");
-		latId = this.metadata.getMetadata("lat");
+		id = metadata.getId();
+		lonId = metadata.getMetadata("lon");
+		latId = metadata.getMetadata("lat");
 
 		if(id == null || lonId == null || latId == null)
 		{
@@ -49,14 +52,24 @@ public class CsvParser extends Parser
 				throw new ParseException("Invalid CSV file");
 			}
 
-			CsvDescriptor descriptor = new CsvDescriptor(getProperties(line), id, lonId, latId);
+			String[] properties = getProperties(line);
+			CsvDescriptor descriptor = new CsvDescriptor(properties, id, lonId, latId);
+			int numOfProps = properties.length, count = 1;
 			elements = new ArrayList<>();
 
 			while((line = reader.readLine()) != null)
 			{
-				CsvElement element = new CsvElement(getProperties(line), descriptor);
+				properties = getProperties(line);
+
+				if(properties.length != numOfProps)
+				{
+					throw new ParseException("At line " + count + ": received " + properties.length + " properties, expected " + numOfProps);
+				}
+
+				CsvElement element = new CsvElement(properties, descriptor);
 
 				elements.add(element);
+				count++;
 			}
 		}
 		catch(IOException e)

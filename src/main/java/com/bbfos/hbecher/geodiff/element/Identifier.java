@@ -1,7 +1,12 @@
 package com.bbfos.hbecher.geodiff.element;
 
 /**
- * Represents the unique identifier of an {@link Element}.
+ * Represents the unique identifier of an {@link Element}.<br><br>
+ * A unique identifier is required for the program to work,
+ * as it needs a way to match each Feature from one set to one of the other.
+ *
+ * @see com.bbfos.hbecher.geodiff.geojson.GeoJsonIdentifier GeoJsonIdentifier
+ * @see com.bbfos.hbecher.geodiff.csv.CsvIdentifier CsvIdentifier
  */
 public abstract class Identifier
 {

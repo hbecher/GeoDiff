@@ -11,6 +11,9 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 
+/**
+ * Work in progress.
+ */
 public class CsvElement extends Element
 {
 	private final String[] properties;

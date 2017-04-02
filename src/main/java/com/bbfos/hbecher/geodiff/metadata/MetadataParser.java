@@ -6,7 +6,13 @@ import java.util.Map;
 import com.bbfos.hbecher.geodiff.parser.ParseException;
 
 /**
- * This class is used to parse metadata information.
+ * This class is used to parse metadata information.<br><br>
+ * Example uses of {@code --metadata} (or {@code -m}):<br>
+ * <pre>
+ * --metadata id=MyUid;
+ * -mid=;
+ * </pre>
+ * Note that empty values are allowed, in this case the unique identifier is empty (see {@link com.bbfos.hbecher.geodiff.element.Identifier Identifier}).
  */
 public final class MetadataParser
 {

@@ -7,7 +7,7 @@ import java.util.Map;
  * The metadata gives information to the parsers, such as what {@link com.bbfos.hbecher.geodiff.element.Identifier uniquely identifies} each element.
  * At the moment, it is only used to give a custom identifier for GeoJSON elements
  * (if they don't have the default one, such as one or more of their properties) and describe the fields of CSV files.<br>
- * The uid can be accessed using the {@link #getId()} method, provided it was specified. The name of the uid key is {@value ID}.
+ * The uid can be accessed using the {@link #getId()} method, provided it was specified. The name of the uid key is {@value ID}.<br><br>
  */
 public class Metadata
 {

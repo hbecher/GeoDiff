@@ -2,6 +2,11 @@ package com.bbfos.hbecher.geodiff.parser;
 
 public class ParseException extends Exception
 {
+	public ParseException()
+	{
+		super();
+	}
+
 	public ParseException(String message)
 	{
 		super(message);

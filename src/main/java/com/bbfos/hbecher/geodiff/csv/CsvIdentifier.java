@@ -2,6 +2,9 @@ package com.bbfos.hbecher.geodiff.csv;
 
 import com.bbfos.hbecher.geodiff.element.Identifier;
 
+/**
+ * Work in progress.
+ */
 public class CsvIdentifier extends Identifier
 {
 	private final String id;

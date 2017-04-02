@@ -6,14 +6,14 @@ import com.bbfos.hbecher.geodiff.geojson.GeoJsonElement;
 
 /**
  * Represents an element of any type (that can be GeoJSON, CSV, etc.).<br>
- * This is basically an accessor to all properties needed for the computation.
+ * This class offers the minimal properties needed for the computation.
  */
 public abstract class Element
 {
 	private Status status = Status.UNDEFINED; // undefined before computation
 
 	/**
-	 * Returns the {@link Identifier unique identifier} of this element.
+	 * Returns the unique identifier of this element.
 	 *
 	 * @return The unique identifier
 	 * @see Identifier
@@ -21,7 +21,7 @@ public abstract class Element
 	public abstract Identifier getId();
 
 	/**
-	 * Returns the {@link Type type} of this element.
+	 * Returns the type of this element.
 	 *
 	 * @return The type
 	 * @see Type
@@ -29,7 +29,7 @@ public abstract class Element
 	public abstract Type getType();
 
 	/**
-	 * Returns the {@link Coordinates list of coordinates} of this element.
+	 * Returns the coordinates (geometry) of this element.
 	 *
 	 * @return The type
 	 * @see Coordinates
@@ -37,7 +37,7 @@ public abstract class Element
 	public abstract Coordinates getCoordinates();
 
 	/**
-	 * Converts this element to a {@link GeoJsonElement}.
+	 * Converts this element to a {@code GeoJsonElement}.
 	 *
 	 * @return The GeoJsonElement representation of this element
 	 * @see GeoJsonElement

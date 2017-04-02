@@ -11,6 +11,8 @@ import com.github.filosganga.geogson.model.*;
 import com.github.filosganga.geogson.model.positions.LinearPositions;
 import com.github.filosganga.geogson.model.positions.Positions;
 import com.github.filosganga.geogson.model.positions.SinglePosition;
+import com.google.common.collect.ImmutableMap;
+import com.google.gson.JsonElement;
 
 /**
  * This class contains various utility methods used throughout the program.
@@ -27,13 +29,31 @@ public class Utils
 	}
 
 	/**
+	 * Converts the {@code Element} to its corresponding {@code Feature},
+	 * adds the GeoDiff status property {@value GEODIFF_PROPERTY} to the feature's properties
+	 * and returns the new feature.<br>
+	 * This method checks if the property has already been added beforehand and replaces it,
+	 * otherwise it would throw an exception (due to the implementation).
+	 *
+	 * @param element the element to decorate
+	 * @return The corresponding decorated feature
+	 */
+	private static Feature decorate(Element element)
+	{
+		Feature feature = element.toGeoJsonElement().getFeature();
+
+		return feature.properties().containsKey(GEODIFF_PROPERTY) ? new Feature(feature.geometry(), ImmutableMap.<String, JsonElement>builder().putAll(feature.properties().entrySet().stream().filter(entry -> !entry.getKey().equals(GEODIFF_PROPERTY)).collect(Collectors.toList())).put(GEODIFF_PROPERTY, element.getStatus().toJson()).build(), feature.id()) : feature.withProperty(GEODIFF_PROPERTY, element.getStatus().toJson());
+	}
+
+	/**
 	 * Returns the decorated features.
 	 *
+	 * @param elements the list of elements
 	 * @return The decorated features.
 	 */
 	public static List<Feature> toFeatures(List<Element> elements)
 	{
-		return elements.stream().map(element -> element.toGeoJsonElement().getFeature().withProperty(GEODIFF_PROPERTY, element.getStatus().toJson())).collect(Collectors.toList());
+		return elements.stream().map(Utils::decorate).collect(Collectors.toList());
 	}
 
 	/**
@@ -57,7 +77,7 @@ public class Utils
 
 	/**
 	 * Returns a list containing all the elements from {@code list} that are equal to {@code that}, i.e all elements that satisfy
-	 * <code>element.equals(that) == true</code>
+	 * <pre>element.equals(that) == true</pre>
 	 *
 	 * @param list the list
 	 * @param that the element to match
@@ -79,6 +99,11 @@ public class Utils
 	 */
 	public static boolean equalsGeometry(Geometry<? extends Positions> g1, Geometry<? extends Positions> g2)
 	{
+		if(g1 == g2)
+		{
+			return true;
+		}
+
 		if(g1.type() != g2.type() || g1.size() != g2.size())
 		{
 			// not the same type, different number of coordinates
@@ -93,7 +118,7 @@ public class Utils
 				// the same goes for their holes, but they don't need to be in the same order.
 				Polygon p1 = (Polygon) g1, p2 = (Polygon) g2;
 
-				return equalsCyclical(p1.perimeter(), p2.perimeter()) && equalsOrder(collect(p1.holes()), collect(p2.holes()));
+				return equalsCyclical(p1.perimeter().positions(), p2.perimeter().positions()) && equalsOrder(collect(p1.holes()), collect(p2.holes()));
 			}
 
 			case LINEAR_RING:
@@ -101,7 +126,7 @@ public class Utils
 				// two linear rings are equivalent <==> they describe the same coordinates up to a shift
 				LinearRing lr1 = (LinearRing) g1, lr2 = (LinearRing) g2;
 
-				return equalsCyclical(lr1, lr2);
+				return equalsCyclical(lr1.positions(), lr2.positions());
 			}
 
 			case LINE_STRING:
@@ -122,7 +147,7 @@ public class Utils
 			{
 				MultiPoint mp1 = (MultiPoint) g1, mp2 = (MultiPoint) g2;
 
-				return equalsCyclical(mp1, mp2) || equalsOrder(collect(mp1.points()), collect(mp2.points()));
+				return equalsCyclical(mp1.positions(), mp2.positions()) || equalsOrder(collect(mp1.points()), collect(mp2.points()));
 			}
 
 			case MULTI_POLYGON:
@@ -158,7 +183,7 @@ public class Utils
 		return false;
 	}
 
-	public static <T extends Geometry<? extends Positions>> boolean equalsIgnoreOrder(List<T> l1, List<T> l2)
+	private static <T extends Geometry<? extends Positions>> boolean equalsIgnoreOrder(List<T> l1, List<T> l2)
 	{
 		if(l1 == l2)
 		{
@@ -191,50 +216,47 @@ public class Utils
 		return true;
 	}
 
-	public static <T extends Geometry<? extends Positions>> boolean equalsOrder(List<T> l1, List<T> l2)
+	private static <T extends Geometry<? extends Positions>> boolean equalsOrder(List<T> l1, List<T> l2)
 	{
 		return l1 == l2 || l1.size() == l2.size() && IntStream.range(0, l1.size()).allMatch(i -> equalsGeometry(l1.get(i), l2.get(i)));
 	}
 
-	public static boolean equalsCyclical(LinearGeometry l1, LinearGeometry l2)
-	{
-		return l1 == l2 || l1.size() == l2.size() && (l1.size() == 0 || equalsCyclical(l1.positions(), l2.positions()));
-	}
-
-	public static boolean equalsCyclical(LinearPositions lp1, LinearPositions lp2)
+	private static boolean equalsCyclical(LinearPositions lp1, LinearPositions lp2)
 	{
 		if(lp1 == lp2)
 		{
 			return true;
 		}
 
-		if(lp1.isClosed() && lp2.isClosed())
+		if(lp1.size() != lp2.size())
 		{
-			List<SinglePosition> sps1 = collect(lp1.children()), sps2 = collect(lp2.children());
-			List<Integer> startingPoints = matching(sps2, sps1.get(0));
+			return false;
+		}
 
-			for(Integer start : startingPoints)
+		List<SinglePosition> sps1 = collect(lp1.children()), sps2 = collect(lp2.children());
+		List<Integer> startingPoints = matching(sps2, sps1.get(0));
+
+		for(Integer start : startingPoints)
+		{
+			Iterator<SinglePosition> i1 = sps1.iterator();
+			ShiftedIterator<SinglePosition> i2 = new ShiftedIterator<>(sps2, start);
+			boolean equals = true;
+
+			while(i1.hasNext()) // lp1.size() == lp2.size()
 			{
-				Iterator<SinglePosition> i1 = sps1.iterator();
-				ShiftedIterator<SinglePosition> i2 = new ShiftedIterator<>(sps2, start);
-				boolean equals = true;
+				SinglePosition sp1 = i1.next(), sp2 = i2.next();
 
-				while(i1.hasNext() && i2.hasNext()) // just in case
+				if(!sp1.equals(sp2))
 				{
-					SinglePosition sp1 = i1.next(), sp2 = i2.next();
+					equals = false;
 
-					if(!sp1.equals(sp2))
-					{
-						equals = false;
-
-						break;
-					}
+					break;
 				}
+			}
 
-				if(equals)
-				{
-					return true;
-				}
+			if(equals)
+			{
+				return true;
 			}
 		}
 

@@ -17,6 +17,10 @@ import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonReader;
 
+/**
+ * The GeoJSON parser.<br><br>
+ * At the moment, it only support input files representing a FeatureCollection (not individual Features).
+ */
 public class GeoJsonParser extends Parser
 {
 	public static final Gson GSON = new GsonBuilder().registerTypeAdapterFactory(new GeometryAdapterFactory()).create();

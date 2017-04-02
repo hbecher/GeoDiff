@@ -5,7 +5,7 @@ import java.util.Arrays;
 import com.github.filosganga.geogson.model.Geometry;
 
 /**
- * Represents the name of an {@link Element}.<br>
+ * Represents the type of an {@link Element}.<br>
  * Supported types are:
  * <ul>
  * <li>{@code Point}</li>
@@ -16,7 +16,7 @@ import com.github.filosganga.geogson.model.Geometry;
  * <li>{@code MultiPolygon}</li>
  * <li>{@code GeometryCollection}</li>
  * </ul>
- * The {@code Unknown} name is used if name is not recognized.
+ * The {@code Unknown} name is used if type is not recognized.
  */
 public enum Type
 {

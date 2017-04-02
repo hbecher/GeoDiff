@@ -6,7 +6,7 @@ import com.github.filosganga.geogson.model.Geometry;
 import com.github.filosganga.geogson.model.positions.Positions;
 
 /**
- * Represents the coordinates of an {@link Element}.
+ * Contains the coordinates (geometry) of an {@link Element}.
  */
 public class Coordinates
 {
