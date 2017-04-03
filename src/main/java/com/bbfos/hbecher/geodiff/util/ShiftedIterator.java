@@ -6,13 +6,13 @@ import java.util.function.Consumer;
 /**
  * An iterator that traverses a virtually left-shifted list.
  * <br><br>
- * For example, if we consider the list {@code l = [1, 5, 9, 7, 3, 0]}, a shifted iterator over {@code l} starting at index {@code 4}
+ * For example, if we consider the list {@code l = [1, 5, 9, 7, 3, 0]}, a shifted iterator over {@code l} starting at index {@code 3}
  * would iterate over {@code [7, 3, 0, 1, 5, 9]}.<br>
  * This is especially useful when testing if two lists describe the same cycle.
  * <br><br>
  * The {@link Iterator#remove()} operation is supported.
  * <br><br>
- * <b>This iterator is not thread safe, nor does it detect concurrent modifications.</b>
+ * <b>This iterator is not thread safe.</b>
  *
  * @param <T> the type of elements returned by this iterator
  * @see #ShiftedIterator(List, int)
@@ -102,7 +102,8 @@ public class ShiftedIterator<T> implements Iterator<T>
 	}
 
 	/**
-	 * Controls additional concurrent modification checking (slower on large lists).
+	 * Controls additional concurrent modification checking (slower on large lists).<br>
+	 * OFF by default.
 	 *
 	 * @param checkForCoMod whether to check or not
 	 */
