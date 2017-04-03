@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GeoDiff</title>
+    <meta charset="UTF-8"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css"/>
+    <script type="text/javascript" src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
+    <script type="text/javascript" src="js/jquery-3.2.0.min.js"></script>
+    <link rel="stylesheet" href="css/geodiff.css"/>
+    <script type="text/javascript" src="js/geodiff.js"></script>
+    <script type="text/javascript" src="js/CompareGeojsonGeometryOrdonne.js"></script>
+</head>
+<body>
+<div id="container">
+    <div id="geodiff"></div>
+</div>
+<div id="controls">
+    <h2>Panneau de contrôle GeoDiff</h2>
+    <p>Choisissez ce que vous voulez faire</p>
+    <button name="choice" id="calc-choice" onclick="select('calc')">Calculer les différences entre deux GeoJSON</button>
+    <button name="choice" id="show-choice" onclick="select('show')">Afficher des différences précalculées</button>
+    <!-- Ce formulaire permet a l'utilisateur de donner son champs id contenue dans les properties -->
+
+    <!-- C'est le seul cas traite pour le moment  -->
+    <!-- Le bouton ok deviens cliquable apres avoir remplit le champs texte -->
+    <!-- amelioraion possible traiter le cas d'un champ id ailleurs que dans les properties  -->
+    <div name="tab" id="calc-div" hidden>
+        <p>Sélectionnez deux fichiers GeoJSON afin de calculer leur différence.
+        <p>
+            <label for="uid_field">Indiquer le nom de votre champs ID</label><input type="text" name="uid_field"
+                                                                                    id="uid_field"><br/>
+            <button id="buttonOK" onclick="getID()" disabled/>
+            OK</button>
+            <br/>
+            <!-- Ici on pemet a l'utilisateur de chosir les fichiers d'entree puis de telecharger le resultat -->
+            <!-- Il n'est pas visible avant la validation du nom du champs id au precedent formulaire-->
+        <div id="div-file" hidden>
+            <label for="fileA">Ancienne version</label>
+            <input id="fileA" type="file" onchange="checkFileInputs()">
+            <br/>
+            <label for="fileB">Nouvelle version</label>
+            <input id="fileB" type="file" onchange="checkFileInputs()">
+            <br/><br/>
+            <button id="calc" onclick="parseFiles()" disabled>Calculer les différences</button>
+            <br/><br/>
+            <button id="download" onclick="download()" hidden>Télécharger</button>
+        </div>
+    </div>
+    <div name="tab" id="show-div" hidden>
+        <p>Ouvrez le résultat d'un calcul.
+        <p>
+            <input id="fileDiff" type="file">
+            <br/><br/>
+            <button id="show" onclick="show()" disabled>Afficher les différences</button>
+    </div>
+    <br/><br/>
+    <button onclick="reset()">Tout réinitialiser</button>
+</div>
+<form method=post action="download.php" id="data-form" hidden>
+    <input type="text" name="add" id="data-add" hidden>
+    <input type="text" name="del" id="data-del" hidden>
+    <input type="text" name="old" id="data-old" hidden>
+    <input type="text" name="new" id="data-new" hidden>
+    <input type="text" name="mod" id="data-mod" hidden>
+    <input type="text" name="id" id="data-id" hidden>
+    <input type="text" name="undef" id="data-undef" hidden>
+</form>
+<script type="text/javascript">
+			// le bouton ok devient cliquable lorsque l'utilisateur rentre un nom d'id
+			document.getElementById("uid_field").oninput = function(event)
+			{
+				//console.log('input changed to: ', input.value);
+				document.getElementById("buttonOK").disabled = this.value ? false : true;
+			};
+
+			document.getElementById("fileDiff").onchange = function(event)
+			{
+				document.getElementById("show").disabled = !this.files.length;
+			};
+
+			map = L.map('geodiff').setView([46.6301603, 2.5011229], 6);
+
+			L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+				attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+				maxZoom: 18,
+				id: 'mapbox.satellite',
+				accessToken: 'pk.eyJ1IjoiaGJlY2hlciIsImEiOiJjaXl1NndsOHIwMDFuMnBwZGs0cXVnaWhoIn0.eqPdgZUTqVjDzI3fLdMhyA'
+			}).addTo(map);
+
+			layer.addTo(map);
+
+			update(emptyGeoJson);
+
+</script>
+</body>
+</html>

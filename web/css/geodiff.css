@@ -9,12 +9,16 @@ html, body {
 	top: 0;
 	left: 0;
 	bottom: 0;
-	right: 264px;
+	right: 360px;
 	float: left;
 	height: 100%;
 	display: block;
 	margin: 0;
 	padding: 0;
+}
+
+#controls {
+	border-style: ridge;
 }
 
 #geodiff {
@@ -29,7 +33,7 @@ html, body {
 	top: 0;
 	right: 0;
 	bottom: 0;
-	width: 256px;
+	width: 354px;
 	margin: 0;
 	padding: 0;
 }
