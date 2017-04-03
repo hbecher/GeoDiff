@@ -12,7 +12,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 
 /**
- * Work in progress.
+ * Represents a CSV element.
  */
 public class CsvElement extends Element
 {
@@ -21,6 +21,13 @@ public class CsvElement extends Element
 	private final CsvIdentifier id;
 	private final Coordinates point;
 
+	/**
+	 * The constructor.
+	 *
+	 * @param properties the properties corresponding to this element
+	 * @param descriptor the CSV descriptor
+	 * @throws IllegalArgumentException if the properties are invalid
+	 */
 	public CsvElement(String[] properties, CsvDescriptor descriptor)
 	{
 		this.properties = properties;

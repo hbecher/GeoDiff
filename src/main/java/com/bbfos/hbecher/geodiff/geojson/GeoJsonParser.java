@@ -33,6 +33,12 @@ public class GeoJsonParser extends Parser
 		this.id = metadata == null ? null : getIdentifiers(metadata.getId());
 	}
 
+	/**
+	 * Returns the list of identifier keys.
+	 *
+	 * @param id the value associated with the id key
+	 * @return The list of identifiers
+	 */
 	private static String[] getIdentifiers(String id)
 	{
 		return id == null ? null : id.isEmpty() ? new String[0] : id.split(",");

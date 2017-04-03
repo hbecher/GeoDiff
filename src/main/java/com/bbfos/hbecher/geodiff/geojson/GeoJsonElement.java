@@ -89,7 +89,7 @@ public class GeoJsonElement extends Element
 
 					if(e == null)
 					{
-						throw new IllegalArgumentException("Feature has no property " + property);
+						throw new IllegalArgumentException("Feature has no property '" + property + "'");
 					}
 
 					obj.add(property, e);

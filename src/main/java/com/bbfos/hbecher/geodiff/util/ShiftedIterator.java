@@ -19,9 +19,9 @@ import java.util.function.Consumer;
  */
 public class ShiftedIterator<T> implements Iterator<T>
 {
-	private List<T> list;
-	private int start, pos = -1, expectedSize, lastHashCode;
-	private boolean removed = false;
+	private final List<T> list, ref;
+	private int start, pos = -1;
+	private boolean removed, checkForCoMod;
 
 	/**
 	 * Creates a {@code ShiftedIterator} with the start index set at {@code 0}.<br>
@@ -58,9 +58,8 @@ public class ShiftedIterator<T> implements Iterator<T>
 		}
 
 		this.list = list;
+		ref = new ArrayList<T>(list); // a reference list for detecting concurrent modifications
 		this.start = start;
-		expectedSize = list.size();
-		lastHashCode = list.hashCode();
 	}
 
 	/**
@@ -76,6 +75,42 @@ public class ShiftedIterator<T> implements Iterator<T>
 		return Math.floorMod(pos + start, size);
 	}
 
+	/**
+	 * Checks if a concurrent modification has been made.
+	 *
+	 * @param list the list to check
+	 * @param ref  the reference list
+	 * @param <T>  the type of elements of the lists
+	 * @throws ConcurrentModificationException if a concurrent modification has been detected
+	 */
+	private static <T> void checkConcurrentModification(List<T> list, List<T> ref) throws ConcurrentModificationException
+	{
+		int size = list.size();
+
+		if(size != ref.size())
+		{
+			throw new ConcurrentModificationException();
+		}
+
+		for(int i = 0; i < size; i++)
+		{
+			if(list.get(i) != ref.get(i))
+			{
+				throw new ConcurrentModificationException();
+			}
+		}
+	}
+
+	/**
+	 * Controls additional concurrent modification checking (slower on large lists).
+	 *
+	 * @param checkForCoMod whether to check or not
+	 */
+	public void checkForCoMod(boolean checkForCoMod)
+	{
+		this.checkForCoMod = checkForCoMod;
+	}
+
 	@Override
 	public boolean hasNext()
 	{
@@ -85,12 +120,12 @@ public class ShiftedIterator<T> implements Iterator<T>
 	@Override
 	public T next() throws NoSuchElementException
 	{
-		int size = list.size();
-
-		if(size != expectedSize || list.hashCode() != lastHashCode)
+		if(checkForCoMod)
 		{
-			throw new ConcurrentModificationException();
+			checkConcurrentModification(list, ref);
 		}
+
+		int size = list.size();
 
 		if(pos >= size)
 		{
@@ -109,19 +144,12 @@ public class ShiftedIterator<T> implements Iterator<T>
 	@Override
 	public void remove()
 	{
+		if(checkForCoMod)
+		{
+			checkConcurrentModification(list, ref);
+		}
+
 		int size = list.size();
-
-		if(size != expectedSize)
-		{
-			throw new ConcurrentModificationException();
-		}
-
-		int hashCode = list.hashCode();
-
-		if(hashCode != lastHashCode)
-		{
-			throw new ConcurrentModificationException();
-		}
 
 		if(pos >= size)
 		{
@@ -133,15 +161,16 @@ public class ShiftedIterator<T> implements Iterator<T>
 			throw new IllegalStateException("Element already removed");
 		}
 
-		list.remove(mod(pos--, start, size));
+		int index = mod(pos--, start, size);
+
+		list.remove(index);
+		ref.remove(index);
 
 		if(pos + start >= list.size())
 		{
 			start--;
 		}
 
-		expectedSize--;
-		lastHashCode = hashCode;
 		removed = true;
 	}
 

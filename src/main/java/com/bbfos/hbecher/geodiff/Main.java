@@ -6,12 +6,15 @@ import java.io.PrintWriter;
 import java.util.EnumSet;
 import java.util.List;
 
+import com.bbfos.hbecher.geodiff.csv.CsvParser;
 import com.bbfos.hbecher.geodiff.element.Status;
 import com.bbfos.hbecher.geodiff.geojson.GeoJsonParser;
 import com.bbfos.hbecher.geodiff.metadata.Metadata;
 import com.bbfos.hbecher.geodiff.metadata.MetadataParser;
+import com.bbfos.hbecher.geodiff.parser.Format;
 import com.bbfos.hbecher.geodiff.parser.ParseException;
 import com.bbfos.hbecher.geodiff.parser.ParsedElements;
+import com.bbfos.hbecher.geodiff.parser.Parser;
 import joptsimple.*;
 
 /**
@@ -25,7 +28,8 @@ public class Main
 		OptionParser optionParser = new OptionParser();
 
 		AbstractOptionSpec<Void> help = optionParser.accepts("help", "Shows this help message").forHelp();
-		ArgumentAcceptingOptionSpec<String> filters = optionParser.accepts("filters", "The list of statuses to keep, separated by commas - possible values: 'add' (additions), 'del' (deletions), 'old' (old versions), 'new' (new versions), 'mod' (all previous ones), 'id' (unchanged) and 'undef' (the ones that couldn't be processed, for some reason)").withRequiredArg().describedAs("FILTERS");
+		ArgumentAcceptingOptionSpec<String> filters = optionParser.accepts("filters", "The list of statuses to keep, separated by commas - possible values: 'add' (additions), 'del' (deletions), 'old' (old versions), 'new' (new versions), 'mod' (all previous ones), 'id' (unchanged) and 'undef' (the ones that couldn't be processed, for some reason). If not specified, additions, deletions and new versions are returned.").withRequiredArg().describedAs("FILTERS");
+		ArgumentAcceptingOptionSpec<String> data = optionParser.accepts("data", "The input files format, can be one of 'geojson' or 'csv' (defaults to 'geojson').").withRequiredArg().describedAs("FORMAT");
 		ArgumentAcceptingOptionSpec<String> metadata = optionParser.accepts("metadata", "Some additional information for the parser").withRequiredArg().describedAs("META");
 		ArgumentAcceptingOptionSpec<File> output = optionParser.accepts("output", "The output file (prints to the console if not specified)").withRequiredArg().ofType(File.class).describedAs("OUTPUT");
 		NonOptionArgumentSpec<String> nonOption = optionParser.nonOptions();
@@ -84,7 +88,40 @@ public class Main
 				}
 				else
 				{
-					statuses = EnumSet.allOf(Status.class);
+					statuses = EnumSet.of(Status.ADDITION, Status.DELETION, Status.NEW_VERSION);
+				}
+
+				Format format; // the input files format
+
+				if(optionSet.has(data))
+				{
+					String s = optionSet.valueOf(data);
+
+					switch(s.toLowerCase())
+					{
+						case "geojson":
+						{
+							format = Format.GEOJSON;
+
+							break;
+						}
+
+						case "csv":
+						{
+							format = Format.CSV;
+
+							break;
+						}
+
+						default:
+						{
+							throw new IllegalArgumentException("Unrecognized format: " + s);
+						}
+					}
+				}
+				else
+				{
+					format = Format.GEOJSON;
 				}
 
 				Metadata meta;
@@ -117,7 +154,29 @@ public class Main
 
 				try
 				{
-					GeoJsonParser parser = new GeoJsonParser(fileA, fileB, meta);
+					Parser parser;
+
+					switch(format)
+					{
+						case GEOJSON:
+						{
+							parser = new GeoJsonParser(fileA, fileB, meta);
+
+							break;
+						}
+
+						case CSV:
+						{
+							parser = new CsvParser(fileA, fileB, meta);
+
+							break;
+						}
+
+						default:
+						{
+							throw new RuntimeException("No format specified?");
+						}
+					}
 
 					parsedElements = parser.parse();
 				}

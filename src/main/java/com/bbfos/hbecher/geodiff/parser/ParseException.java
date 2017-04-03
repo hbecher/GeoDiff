@@ -1,5 +1,8 @@
 package com.bbfos.hbecher.geodiff.parser;
 
+/**
+ * Thrown when a exception occurs while parsing.
+ */
 public class ParseException extends Exception
 {
 	public ParseException()

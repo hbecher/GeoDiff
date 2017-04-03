@@ -2,6 +2,7 @@ package com.bbfos.hbecher.geodiff;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import com.bbfos.hbecher.geodiff.element.Element;
 import com.bbfos.hbecher.geodiff.element.Identifier;
@@ -33,13 +34,8 @@ public class GeoDiff
 	 */
 	public GeoDiff(List<Element> elementsA, List<Element> elementsB)
 	{
-		if(elementsA == null || elementsB == null)
-		{
-			throw new NullPointerException();
-		}
-
-		this.elementsA = elementsA;
-		this.elementsB = elementsB;
+		this.elementsA = Objects.requireNonNull(elementsA);
+		this.elementsB = Objects.requireNonNull(elementsB);
 	}
 
 	/**

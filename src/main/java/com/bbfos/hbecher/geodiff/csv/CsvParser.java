@@ -13,7 +13,14 @@ import com.bbfos.hbecher.geodiff.parser.ParseException;
 import com.bbfos.hbecher.geodiff.parser.Parser;
 
 /**
- * Work in progress.
+ * The CSV parser.<br><br>
+ * This parser is only compatible with Points.<br>
+ * Three properties are required to parse CSV elements, extracted from the metadata:
+ * <ul>
+ * <li>the uid ("id")</li>
+ * <li>the longitude key ("lon")</li>
+ * <li>the latitude key ("lat")</li>
+ * </ul>
  */
 public class CsvParser extends Parser
 {

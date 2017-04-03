@@ -30,7 +30,7 @@ public final class MetadataParser
 	 *
 	 * @param metadata the raw metadata string
 	 * @return The parsed metadata
-	 * @throws ParseException if the metadata has the wrong syntax
+	 * @throws ParseException if the metadata is invalid
 	 */
 	public Metadata parse(String metadata) throws ParseException
 	{
