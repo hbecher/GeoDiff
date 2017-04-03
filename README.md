@@ -12,7 +12,7 @@ It is developed by three RICM (*Networks and Multimedia Communication*) students
 * BECHER Hervé
 * BROCHIER Aymeric
 
-The project's supervisor is Nicolas Palix.  
+The project's supervisor is [Nicolas Palix](http://lig-membres.imag.fr/palix/).  
 You can find more information on
 * the [main page](http://air.imag.fr/index.php/GeoDiff) of the project [FR]
 * our [project progress report](http://air.imag.fr/index.php/Projets-2016-2017-GeoDiff) page [EN]
