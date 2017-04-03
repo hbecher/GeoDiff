@@ -1,18 +1,14 @@
-//https://forum.alsacreations.com/topic-5-3955-1-Rsolu-Comparer-deux-arrays-.html
- //revoir la fonction ci dessous 
-
+//https://forum.alsacreations.com/topic-5-3955-1-Rsolu-Comparer-deux-arrays-.html 
  //VERSION QUI TIENT COMPTE DE L'ORDRE 
 
-    function CompareGeojsonGeometry(a1, a2,ty)
-    //to do eventuelement s'aafranchir du parametre ty 
-    
+    function CompareGeojsonGeometry(a1, a2,ty)  
 {
      
-    var res = false ;//resultat intermediaire 1
+    var res = false ;
     //console.log(ty);
     switch(ty){
         case "Point"://{longitude,latitude,(hauteur)}
-        //verif des coordonnees des point && du param optionnel hauteur 
+        //verif des coordonnees des point et du param optionnel hauteur 
             if (a1.length !== a2.length){ //cas ou la hauteur est present sur l'un des deux point si non presnte on suppose = 0 
                 return ( a1[0] == a2[0] && a1[1] == a2[1] && ( a1[2] == 0 || a1[2] == "undefined") && ( a2[2] == 0 || a2[2] == "undefined"));
             }
@@ -25,7 +21,7 @@
             if (a1.length !== a2.length){//nb de point dans les multipoint 
                     return false;//forcement faux 
             }else{
-                //cas particulier non traite : cycle {p1,p2,p3} != {p2,p3,p1} attendu vraie mais reconnu faux par cette fonction 
+                //cas particulier non traite : cycle {p1,p2,p3} != {p2,p3,p1} pourrai etre attendu vraie mais reconnu faux par cette fonction 
                 for (var i = 0; i < a1.length; ++i){
                     //console.log("a=",a);
                     //pour chaque  ieme elem des des linestring ou multi point : des points 
@@ -58,7 +54,7 @@
             }else{
                 for (var i = 0; i < a1.length; ++i){
                     //console.log("a=",a);
-                    //pour chaque  ieme elem des tab : polygon
+                    //pour chaque  ieme elem : polygon
                     res= CompareGeojsonGeometry(a1[i], a2[i],"Polygon");
                     if(!res){
                         return false;
