@@ -8,9 +8,9 @@ We like to call it
 ## Context
 GeoDiff is part of the 4th year innovative project at [Polytech' Grenoble](http://www.polytech-grenoble.fr/), France.  
 It is developed by three RICM (*Networks and Multimedia Communication*) students:
-* AMAURIN Alexandre
-* BECHER Hervé
-* BROCHIER Aymeric
+* [AMAURIN Alexandre](https://github.com/amaurina)
+* [BECHER Hervé](https://github.com/Hbecher)
+* [BROCHIER Aymeric](https://github.com/wyr07)
 
 The project's supervisor is [Nicolas Palix](http://lig-membres.imag.fr/palix/).  
 You can find more information on
