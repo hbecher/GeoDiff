@@ -1,6 +1,6 @@
 # GeoDiff
 GeoDiff is a tool for computing the delta of two snapshots of a spatial data set.  
-It also comes with a web interface (available soon) to visualize the differences directly in your browser!
+It also comes with a web interface to compute and visualize the differences directly in your browser!
 
 We like to call it
 > the Unix diff tool for geographic data - [Didier DONSEZ](https://github.com/donsez)
@@ -34,3 +34,6 @@ The web interface uses [jQuery](https://jquery.com/) at the moment, but it will 
 
 ### License
 _Not decided yet_
+
+### Contact
+If you are interested in the project and/or would like to help, feel free to contact me (see [my profile](https://github.com/Hbecher)).
