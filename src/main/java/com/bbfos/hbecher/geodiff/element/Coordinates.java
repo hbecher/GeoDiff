@@ -1,6 +1,6 @@
 package com.bbfos.hbecher.geodiff.element;
 
-import static com.bbfos.hbecher.geodiff.util.Utils.equalsGeometry;
+import static com.bbfos.hbecher.geodiff.util.Equals.equalsGeometry;
 
 import com.github.filosganga.geogson.model.Geometry;
 import com.github.filosganga.geogson.model.positions.Positions;

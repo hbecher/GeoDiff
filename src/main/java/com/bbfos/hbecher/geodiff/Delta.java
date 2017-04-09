@@ -9,7 +9,7 @@ import com.bbfos.hbecher.geodiff.element.Element;
 import com.bbfos.hbecher.geodiff.element.Status;
 
 /**
- * Contains the result of the computation, providing methods to filter elements by their status.
+ * Contains the result of the computation, providing methods to filter elements by their {@link Status}.
  */
 public class Delta
 {
@@ -21,7 +21,7 @@ public class Delta
 	}
 
 	/**
-	 * Returns the list of elements whose {@link Status} is one of {@code statuses}.
+	 * Returns the list of elements whose status is one of {@code statuses}.
 	 *
 	 * @param statuses the desired statuses
 	 * @return The filtered list
