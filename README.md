@@ -18,17 +18,17 @@ You can find more information on
 * our [project progress report](http://air.imag.fr/index.php/Projets-2016-2017-GeoDiff) page [EN]
 
 ## How to Use
-_Coming soon..._
+See [How To Use](HOW_TO_USE.md).
 
 ## Additional Information
 
 ### Languages and librairies used
 The GeoDiff command-line tool is written in Java, and uses
 * [Gson](https://github.com/google/gson) (from Google) for manipulating JSON objects (under Apache License 2.0)
-* [GeoJSON addon](https://github.com/filosganga/geogson) for Gson by user [filosganga](https://github.com/filosganga) (under Apache License 2.0)
+* [GeoGSON](https://github.com/filosganga/geogson), GeoJSON addon for Gson by user [filosganga](https://github.com/filosganga) (under Apache License 2.0)
 * [JOpt Simple](https://pholser.github.io/jopt-simple/) for parsing command line options (under The MIT License)
 
-The web interface uses [jQuery](https://jquery.com/). It embeds a delta computing module written entirely in JavaScript that can process GeoJSON files.
+The web interface uses [jQuery](https://jquery.com/) at the moment, but it will be removed in the near future (it was used only for deep copying an object), making it plain old JavaScript. It embeds a delta computing module, written entirely in JavaScript, that can process GeoJSON files.
 
 ### License
 _Not decided yet_
