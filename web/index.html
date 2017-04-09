@@ -8,7 +8,9 @@
     <script type="text/javascript" src="js/jquery-3.2.0.min.js"></script>
     <link rel="stylesheet" href="css/geodiff.css"/>
     <script type="text/javascript" src="js/geodiff.js"></script>
-    <script type="text/javascript" src="js/CompareGeojsonGeometryOrdonne.js"></script>
+    <script type="text/javascript" src="js/iterator.js"></script>
+    <script type="text/javascript" src="js/equals.js"></script>
+    <script type="text/javascript" src="js/compare.js"></script>
 </head>
 <body>
 <div id="container">
@@ -27,22 +29,23 @@
     <div name="tab" id="calc-div" hidden>
         <p>Sélectionnez deux fichiers GeoJSON afin de calculer leur différence.
         <p>
-            <label for="uid_field">Indiquer le nom de votre champs ID</label><input type="text" name="uid_field"
-                                                                                    id="uid_field"><br/>
-            <button id="buttonOK" onclick="getID()" disabled/>
-            OK</button>
-            <br/>
-            <!-- Ici on pemet a l'utilisateur de chosir les fichiers d'entree puis de telecharger le resultat -->
-            <!-- Il n'est pas visible avant la validation du nom du champs id au precedent formulaire-->
+        <p>Indiquez l'identifiant unique de chaque élément :</p>
+        <input type="text" name="uid_field" id="uid_field"><br>
+        <button id="buttonOK" onclick="getID()">OK</button>
+        <button onclick="showIdHelp()">Aide</button>
+        <br>
+        <!-- Ici on pemet a l'utilisateur de chosir les fichiers d'entree puis de telecharger le resultat -->
+        <!-- Il n'est pas visible avant la validation du nom du champs id au precedent formulaire-->
         <div id="div-file" hidden>
+            <br>
             <label for="fileA">Ancienne version</label>
             <input id="fileA" type="file" onchange="checkFileInputs()">
-            <br/>
+            <br>
             <label for="fileB">Nouvelle version</label>
             <input id="fileB" type="file" onchange="checkFileInputs()">
-            <br/><br/>
+            <br><br>
             <button id="calc" onclick="parseFiles()" disabled>Calculer les différences</button>
-            <br/><br/>
+            <br><br>
             <button id="download" onclick="download()" hidden>Télécharger</button>
         </div>
     </div>
@@ -50,10 +53,10 @@
         <p>Ouvrez le résultat d'un calcul.
         <p>
             <input id="fileDiff" type="file">
-            <br/><br/>
+            <br><br>
             <button id="show" onclick="show()" disabled>Afficher les différences</button>
     </div>
-    <br/><br/>
+    <br><br>
     <button onclick="reset()">Tout réinitialiser</button>
 </div>
 <form method=post action="download.php" id="data-form" hidden>
@@ -66,13 +69,6 @@
     <input type="text" name="undef" id="data-undef" hidden>
 </form>
 <script type="text/javascript">
-			// le bouton ok devient cliquable lorsque l'utilisateur rentre un nom d'id
-			document.getElementById("uid_field").oninput = function(event)
-			{
-				//console.log('input changed to: ', input.value);
-				document.getElementById("buttonOK").disabled = this.value ? false : true;
-			};
-
 			document.getElementById("fileDiff").onchange = function(event)
 			{
 				document.getElementById("show").disabled = !this.files.length;
@@ -86,10 +82,6 @@
 				id: 'mapbox.satellite',
 				accessToken: 'pk.eyJ1IjoiaGJlY2hlciIsImEiOiJjaXl1NndsOHIwMDFuMnBwZGs0cXVnaWhoIn0.eqPdgZUTqVjDzI3fLdMhyA'
 			}).addTo(map);
-
-			layer.addTo(map);
-
-			update(emptyGeoJson);
 
 </script>
 </body>

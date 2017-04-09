@@ -1,4 +1,15 @@
-const geoProperty = "geodiff-type"; // la propriété GeoDiff
+// the unique identifier
+// null <=> GeoJSON standard (feature.id)
+// empty or /\s+/ <=> all properties (feature.properties)
+// <id> <=> feature.properties.<id>
+// <prop1>,<prop2>,... <=> [feature.properties.<prop1>, feature.properties.<prop2>, ...]
+var uid = null;
+
+const geoProperty = "geodiff-type"; // the GeoDiff property
+
+//--------------------------------//
+// the data manipulation module
+//--------------------------------//
 
 // encapsule les features dans une FeatureCollection
 const toGeoJson = function(features)
@@ -7,6 +18,42 @@ const toGeoJson = function(features)
 		"type": "FeatureCollection",
 		"features": features
 	};
+};
+
+// renvoie un marqueur circulaire de couleur c
+const markerOptions = function(c)
+{
+	return {
+		"radius": 6,
+		"fillColor": c,
+		"color": "#000",
+		"weight": 1,
+		"opacity": 1,
+		"fillOpacity": 0.5
+	};
+};
+
+// extrait les propriétés de feature, séparées par un retour à la ligne
+// utilisé dans l'affichage de l'infobulle
+const extractProperties = function(feature)
+{
+	var properties = Object.keys(feature.properties);
+	var props = "";
+
+	for(const prop of properties)
+	{
+		props += "<br>" + prop + ": " + feature.properties[prop];
+	}
+
+	return props;
+};
+
+// retourne la couleur suivant la propriété GeoDiff
+const getColor = function(feature)
+{
+	var c = diffs[feature.properties[geoProperty]];
+
+	return (c ? c : diffs.undef).color;
 };
 
 // le style à appliquer lors de la transformation en objet Leaflet
@@ -45,91 +92,50 @@ const emptyLGeoJson = toLGeoJson(emptyGeoJson); // objet Leaflet GeoJSON vide
 const diffs = {
 	"add": {
 		"name": "Additions",
-		"feartures": [],
+		"features": [],
 		"leaflet": emptyLGeoJson,
 		"color": "#0f0"
 	},
 	"del": {
 		"name": "Suppressions",
-		"feartures": [],
+		"features": [],
 		"leaflet": emptyLGeoJson,
 		"color": "#f00"
 	},
 	"old": {
 		"name": "Anciennes versions",
-		"feartures": [],
+		"features": [],
 		"leaflet": emptyLGeoJson,
 		"color": "#ff7f00"
 	},
 	"new": {
 		"name": "Nouvelles versions",
-		"feartures": [],
+		"features": [],
 		"leaflet": emptyLGeoJson,
 		"color": "#ff0"
 	},
 	"mod": {
 		"name": "Modifications",
-		"feartures": [],
+		"features": [],
 		"leaflet": emptyLGeoJson,
 		"color": "#ff7f00"
 	},
 	"id": {
 		"name": "Identiques",
-		"feartures": [],
+		"features": [],
 		"leaflet": emptyLGeoJson,
 		"color": "#00f"
 	},
 	"undef": {
 		"name": "Indéfinis",
-		"feartures": [],
+		"features": [],
 		"leaflet": emptyLGeoJson,
 		"color": "#f0f"
 	}
 };
 
 // les couches Leaflet
-var layer = L.control.layers(null, {
-	[diffs["undef"].name]: diffs["undef"].leaflet
-});
-
-// renvoie un marqueur circulaire de couleur c
-const markerOptions = function(c)
-{
-	return {
-		"radius": 6,
-		"fillColor": c,
-		"color": "#000",
-		"weight": 1,
-		"opacity": 1,
-		"fillOpacity": 0.5
-	};
-};
-
-// extrait les propriétés de feature, séparées par un retour à la ligne
-// utilisé dans l'affichage de l'infobulle
-const extractProperties = function(feature)
-{
-	var properties = Object.keys(feature.properties);
-	var props = "";
-
-	for(const prop of properties)
-	{
-		props += "<br>" + prop + ": " + feature.properties[prop];
-	}
-
-	return props;
-};
-
-// retourne la couleur suivant la propriété GeoDiff
-const getColor = function(feature)
-{
-	var c = diffs[feature.properties[geoProperty]];
-
-	return (c ? c : diffs.undef).color;
-};
-
-// l'identifiant unique de chaque feature
-var uid = "id";
+var layer = L.control.layers(null, {});
 
 // extrait les différences contenues dans delta
 // et les distribue suivant leur type dans diffs
@@ -140,9 +146,9 @@ const extractDiffs = function(delta)
 		diffs[key].features = [];
 	}
 
-	for(const key of Object.keys(delta.features))
+	for(const key of Object.keys(delta))
 	{
-		let feature = delta.features[key];
+		let feature = delta[key];
 
 		diffs[feature.properties[geoProperty] ? feature.properties[geoProperty] : "undef"].features.push(feature);
 	}
@@ -161,7 +167,7 @@ const update = function(delta)
 
 	extractDiffs(delta);
 
-	var readdLayer = false;
+	var readLayer = false;
 
 	for(const key of Object.keys(diffs))
 	{
@@ -171,7 +177,7 @@ const update = function(delta)
 
 			layer.addOverlay(diffs[key].leaflet, diffs[key].name);
 
-			readdLayer = true;
+			readLayer = true;
 		}
 		else
 		{
@@ -179,51 +185,16 @@ const update = function(delta)
 		}
 	}
 
-	if(readdLayer)
+	if(readLayer)
 	{
 		map.addControl(layer);
 	}
 };
 
-// parse la chaîne en entrée
-const parseGeoJson = function(input)
-{
-	if(input)
-	{
-		try
-		{
-			var delta = JSON.parse(input);
-		}
-		catch(err)
-		{
-			alert("Erreur : syntaxe invalide !\n" + err);
+//--------------------------------//
+// the file downloader
+//--------------------------------//
 
-			return;
-		}
-
-		update(delta);
-	}
-};
-
-// appelé lors d'un clic sur le bouton d'affichage
-const show = function()
-{
-	var fileInput = document.getElementById("fileDiff");
-
-	if(fileInput.files.length)
-	{
-		let reader = new FileReader();
-
-		reader.onload = function(event)
-		{
-			parseGeoJson(this.result);
-		};
-
-		reader.readAsText(fileInput.files[0]);
-	}
-};
-
-// télécharge les différences
 const download = function()
 {
 	var form = document.getElementById("data-form");
@@ -245,8 +216,105 @@ const download = function()
 	}
 }
 
-//------------------------------
+//--------------------------------//
+// the choice picker and resetter
+//--------------------------------//
 
+const select = function(choice)
+{
+	var choices = document.getElementsByName("choice");
+	var tabs = document.getElementsByName("tab");
+
+	for(let e of choices)
+	{
+		e.disabled = true;
+	}
+
+	for(let e of tabs)
+	{
+		e.hidden = true;
+	}
+
+	document.getElementById(choice + "-div").hidden = false;
+};
+
+const reset = function()
+{
+	uid = null;
+
+	map.removeControl(layer);
+
+	for(const key of Object.keys(diffs))
+	{
+		map.removeLayer(diffs[key].leaflet);
+		layer.removeLayer(diffs[key].leaflet);
+
+		diffs[key].features = [];
+		diffs[key].leaflet = emptyLGeoJson;
+	}
+
+	document.getElementById('calc-choice').disabled = false;
+	document.getElementById('show-choice').disabled = false;
+	document.getElementById('calc-div').hidden = true;
+	document.getElementById('show-div').hidden = true;
+	document.getElementById("uid_field").disabled = false;
+	document.getElementById("uid_field").value = "";
+	document.getElementById("buttonOK").disabled = false;
+	document.getElementById("div-file").hidden = true;
+	document.getElementById("fileA").value = "";
+	document.getElementById("fileB").value = "";
+	document.getElementById("calc").disabled = true;
+	document.getElementById("download").hidden = true;
+	document.getElementById("fileDiff").value = "";
+	document.getElementById("show").disabled = true;
+};
+
+//--------------------------------//
+// the input parser module - part 1
+//--------------------------------//
+
+// appelé lors d'un clic sur le bouton d'affichage
+const show = function()
+{
+	var fileInput = document.getElementById("fileDiff");
+
+	if(fileInput.files.length)
+	{
+		let reader = new FileReader();
+
+		reader.onload = function(event)
+		{
+			if(this.result)
+			{
+				try
+				{
+					var delta = JSON.parse(this.result);
+				}
+				catch(err)
+				{
+					alert("Erreur : syntaxe JSON invalide !\n" + err);
+
+					return;
+				}
+
+				update(delta.features);
+			}
+		};
+
+		reader.readAsText(fileInput.files[0]);
+	}
+};
+
+//--------------------------------//
+// the input parser module - part 2
+//--------------------------------//
+
+const showIdHelp = function()
+{
+	alert("Syntaxe de l'identifiant unique :\n- vide : standard GeoJSON (feature.id)\n- espaces : toutes les propriétés (feature.properties)\n- <id> : la propriété <id> (feature.properties.<id>)\n- <prop1>,<prop2>,... : les propriétés spécifiées, séparées par des virgules");
+};
+
+//--------------------------------//
 //variables globale ! 
 //amelioration possible : refactoring de certain nom,separer les implementaions ... 
 const id_table= new Array();//verification unicite des id 
@@ -260,6 +328,7 @@ myObject[4]=new Array();//contiendra les ajouts
 //myObject[2] contiendra fichier 2
 var sup; //debug voir l'element supprime de myobject[1]
 var v = 0 ; //garde le nb de supression DEBUG 
+//--------------------------------//
 
 /*
 recupere le nom de la propriete contenant un identifiant et demasque le choix des fichier d'entree 
@@ -276,6 +345,7 @@ const getID = function()
 	//return uid;
 }
 
+//--------------------------------//
 const parse = function(string, i)
 {
 	//console.log("id:",uid);
@@ -385,42 +455,42 @@ const parse = function(string, i)
 
 	return 0;
 };
+//--------------------------------//
+
+const compareFiles = function(stringA, stringB)
+{
+	try
+	{
+		var jsonA = JSON.parse(stringA), jsonB = JSON.parse(stringB);
+	}
+	catch(err)
+	{
+		alert("Erreur : syntaxe JSON invalide !\n" + err);
+
+		return;
+	}
+
+	var delta = compare(jsonA.features, jsonB.features);
+
+	update(delta);
+
+	document.getElementById("download").hidden = false;
+}
 
 const parseFiles = function()
 {
-	var fileInputA = document.getElementById("fileA");
-	var fileInputB = document.getElementById("fileB");
+	var fileInputA = document.getElementById("fileA"), fileInputB = document.getElementById("fileB");
 
-	let readerA = new FileReader();
+	let readerA = new FileReader(), readerB = new FileReader();
 
 	readerA.onload = function(event)
 	{
-		var resA = parse(this.result, 1);
-		
-		if(resA == -1)
-		{
-			alert("Un doublon a été détecté dans les identifiants du premier fichier !");
+		readerB.readAsText(fileInputB.files[0]);
+	};
 
-			reset();
-		}
-		else
-		{
-			let readerB = new FileReader();
-
-			readerB.onload = function(event)
-			{
-				var resB = parse(this.result, 2);
-				
-				if(resB == -1)
-				{
-					alert("Un doublon a été détecté dans les identifiants du second fichier !");
-
-					reset();
-				}
-			}
-
-			readerB.readAsText(fileInputB.files[0]);
-		}
+	readerB.onload = function(event)
+	{
+		compareFiles(readerA.result, readerB.result);
 	};
 
 	readerA.readAsText(fileInputA.files[0]);
@@ -433,64 +503,4 @@ const checkFileInputs = function()
 	var calcButton = document.getElementById("calc");
 
 	calcButton.disabled = !fileInputA.files.length || !fileInputB.files.length;
-};
-
-const select = function(choice)
-{
-	var choices = document.getElementsByName("choice");
-	var tabs = document.getElementsByName("tab");
-
-	for(let e of choices)
-	{
-		e.disabled = true;
-	}
-
-	for(let e of tabs)
-	{
-		e.hidden = true;
-	}
-
-	document.getElementById(choice + "-div").hidden = false;
-};
-
-const reset = function()
-{
-	uid = "id";
-
-	map.removeControl(layer);
-
-	for(const key of Object.keys(diffs))
-	{
-		map.removeLayer(diffs[key].leaflet);
-		layer.removeLayer(diffs[key].leaflet);
-
-		diffs[key].features = [];
-		diffs[key].leaflet = emptyLGeoJson;
-	}
-
-	id_table[0] = new Array();
-	id_table[1] = new Array(); 
-	myObject[0] = new Array();
-	myObject[1] = new Array();
-	myObject[2] = new Array();
-	myObject[3]=new Array();
-	myObject[4]=new Array();
-
-	sup = undefined;
-	v = 0;
-
-	document.getElementById('calc-choice').disabled = false;
-	document.getElementById('show-choice').disabled = false;
-	document.getElementById('calc-div').hidden = true;
-	document.getElementById('show-div').hidden = true;
-	document.getElementById("uid_field").disabled = false;
-	document.getElementById("uid_field").value = "";
-	document.getElementById("buttonOK").disabled = true;
-	document.getElementById("div-file").hidden = true;
-	document.getElementById("fileA").value = "";
-	document.getElementById("fileB").value = "";
-	document.getElementById("calc").disabled = true;
-	document.getElementById("download").hidden = true;
-	document.getElementById("fileDiff").value = "";
-	document.getElementById("show").disabled = true;
 };
