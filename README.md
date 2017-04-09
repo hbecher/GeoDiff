@@ -18,7 +18,9 @@ You can find more information on
 * our [project progress report](http://air.imag.fr/index.php/Projets-2016-2017-GeoDiff) page [EN]
 
 ## How to Use
-See [How To Use](HOW_TO_USE.md).
+Available soon on the wiki.
+
+The web interface is available on my [Hbecher] personal site [here](http://bbfos.com/~hbecher/geodiff/).
 
 ## Additional Information
 
