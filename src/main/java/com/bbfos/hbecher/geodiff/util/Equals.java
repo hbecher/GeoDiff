@@ -168,12 +168,12 @@ public class Equals
 			return false;
 		}
 
-		List<Integer> startingPoints = matching(lp1, lp1.get(0));
+		List<Integer> startingPoints = matching(lp2, lp1.get(0));
 
 		for(Integer start : startingPoints)
 		{
 			Iterator<SinglePosition> i1 = lp1.iterator();
-			ShiftedIterator<SinglePosition> i2 = new ShiftedIterator<>(lp1, start);
+			ShiftedIterator<SinglePosition> i2 = new ShiftedIterator<>(lp2, start);
 			boolean equals = true;
 
 			while(i1.hasNext()) // lp1.size() == lp2.size()

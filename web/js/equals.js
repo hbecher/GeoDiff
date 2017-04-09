@@ -162,7 +162,7 @@ const equalsCyclical = function(lp1, lp2)
 		return false;
 	}
 
-	var startingPoints = matching(lp1, lp2[0]);
+	var startingPoints = matching(lp2, lp1[0]);
 
 	for(const start of startingPoints)
 	{
