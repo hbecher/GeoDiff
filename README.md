@@ -20,7 +20,7 @@ You can find more information on
 ## How to Use
 Available soon on the wiki.
 
-The web interface is available on my [Hbecher] personal site [here](http://bbfos.com/~hbecher/geodiff/).
+The web interface is available on my [Hbecher] personal site [here](https://alsace-gaming.fr/~hbecher/geodiff/).
 
 ## Additional Information
 
